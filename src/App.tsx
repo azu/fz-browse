@@ -21,108 +21,92 @@ export type AppProps = {
 export const App: VFC<AppProps> = (props) => {
     const [input, setInput] = useState<string>(props.initialInput ?? "")
     const [texts, setTexts] = useState<string[]>([])
-    const [preview, setPreview] = useState<string>("")
+    const [preview, setPreview] = useState<string[]>([])
     useEffect(() => {
         setTexts([]);
+        setPreview([]);
     }, [input])
     const onPreview = useCallback(async (item) => {
-        const fetchPromise = fetch(`/preview?input=${encodeURIComponent(input)}&result=${encodeURIComponent(item)}`).then((res) => {
-            // Verify that we have some sort of 2xx response that we can use
-            if (!res.ok) {
-                throw res;
-            }
-            return res;
-        }).then(res => {
-            let textBuffer = '';
-            return res.body
-                // Decode as UTF-8 Text
-                ?.pipeThrough(new TextDecoderStream())
-                .pipeThrough(new TransformStream({
-                    transform(chunk, controller) {
-                        textBuffer += chunk;
-                        const lines = textBuffer.split('\n');
-                        for (const line of lines.slice(0, -1)) {
-                            controller.enqueue(line);
-                        }
-                        textBuffer = lines.slice(-1)[0];
-                    },
-                    flush(controller) {
-                        if (textBuffer) {
-                            controller.enqueue(textBuffer);
-                        }
-                    }
-                }))
-        });
-        const res = await fetchPromise;
-        const reader = res?.getReader();
-
-        let p =""
-        function read() {
-            reader?.read().then(({ value, done }) => {
-                    if (value) {
-                        p += value +"\n";
-                    }
-                    if (done) {
-                        setPreview(p);
-                        return;
-                    }
-                    read();
-                }
-            );
+        let textBuffer = '';
+        const push = (line: string) => {
+            setPreview(texts => texts.concat(line));
         }
-
-        read();
-    }, [input])
-    useEffect(() => {
-
         const controller = new AbortController()
         const signal = controller.signal
-        const fetchPromise = fetch(`/stream?input=${encodeURIComponent(input)}`, { signal }).then((res) => {
+        const decoder = new TextDecoder();
+        fetch(`/preview?input=${encodeURIComponent(input)}&result=${encodeURIComponent(item)}`, { signal }).then((res) => {
             // Verify that we have some sort of 2xx response that we can use
             if (!res.ok) {
                 throw res;
             }
-            return res;
-        }).then(res => {
-            let textBuffer = '';
-            return res.body
-                // Decode as UTF-8 Text
-                ?.pipeThrough(new TextDecoderStream())
-                .pipeThrough(new TransformStream({
-                    transform(chunk, controller) {
-                        textBuffer += chunk;
-                        const lines = textBuffer.split('\n');
-                        for (const line of lines.slice(0, -1)) {
-                            controller.enqueue(line);
-                        }
-                        textBuffer = lines.slice(-1)[0];
-                    },
-                    flush(controller) {
-                        if (textBuffer) {
-                            controller.enqueue(textBuffer);
-                        }
+            if (!res.body) {
+                throw new Error("No body");
+            }
+            return res.body.getReader();
+        }).then(reader => {
+            function readChunk({ done, value }: ReadableStreamDefaultReadResult<any>) {
+                if (done) {
+                    if (textBuffer) {
+                        push(textBuffer)
                     }
-                }))
-        });
-        (async function () {
-            const res = await fetchPromise;
-            const reader = res?.getReader();
-
-            function read() {
-                reader?.read().then(({ value, done }) => {
-                        if (value) {
-                            setTexts((texts) => texts.concat(value));
-                        }
-                        if (done) {
-                            return;
-                        }
-                        read();
-                    }
-                );
+                    return;
+                }
+                textBuffer += decoder.decode(value);
+                const lines = textBuffer.split('\n');
+                for (const line of lines.slice(0, -1)) {
+                    push(line);
+                }
+                textBuffer = lines.slice(-1)[0];
+                // next
+                reader.read().then(readChunk);
             }
 
-            read();
-        })()
+            setPreview([]);
+            reader.read().then(readChunk);
+        });
+        return () => {
+            controller.abort();
+            setPreview([]);
+        }
+    }, [input])
+    useEffect(() => {
+        const controller = new AbortController()
+        const signal = controller.signal
+        let textBuffer = '';
+        const push = (line: string) => {
+            setTexts(texts => texts.concat(line));
+        }
+        const decoder = new TextDecoder();
+        fetch(`/stream?input=${encodeURIComponent(input)}`, { signal }).then((res) => {
+            // Verify that we have some sort of 2xx response that we can use
+            if (!res.ok) {
+                throw res;
+            }
+            if (!res.body) {
+                throw new Error("No body");
+            }
+            return res.body.getReader();
+        }).then(reader => {
+            function readChunk({ done, value }: ReadableStreamDefaultReadResult<any>) {
+                if (done) {
+                    if (textBuffer) {
+                        push(textBuffer)
+                    }
+                    return;
+                }
+                textBuffer += decoder.decode(value);
+                const lines = textBuffer.split('\n');
+                for (const line of lines.slice(0, -1)) {
+                    push(line);
+                }
+                textBuffer = lines.slice(-1)[0];
+                // next
+                reader.read().then(readChunk);
+            }
+
+            setTexts([]);
+            reader.read().then(readChunk);
+        });
         return () => {
             controller.abort();
             setTexts([]);
@@ -132,14 +116,14 @@ export const App: VFC<AppProps> = (props) => {
         <>
             <input type={"text"} value={input} onChange={(event) => setInput(event.target.value)}/>
             <div style={{ display: "flex" }}>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, maxWidth: "50%" }}>
                     {texts.slice(-100).map((text, index) => {
-                        return <li key={index} onClick={() => onPreview(text)}><a href={props.cwd + text}>{text}</a>
+                        return <li key={index} onClick={() => onPreview(text)}><a>{text}</a>
                         </li>
                     })}
                 </div>
-                <pre>
-                    {preview}
+                <pre style={{ flex: 1, maxWidth: "50%" }}>
+                    {preview.join("\n")}
                 </pre>
             </div>
         </>
