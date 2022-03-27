@@ -2,6 +2,7 @@
 import meow from "meow";
 import path from "path";
 import url from "url";
+import open from "open";
 import { createServer } from "./server.mjs";
 
 const __filename = url.fileURLToPath(import.meta.url);
@@ -35,6 +36,9 @@ const cli = meow(
             },
             preview: {
                 type: "string",
+            },
+            open: {
+                type: "boolean",
             }
         },
         autoHelp: true,
@@ -47,6 +51,9 @@ const server = await createServer({
     run: cli.flags.run,
     preview: cli.flags.preview,
 });
-server.app.listen(3000, () => {
+server.app.listen(3000, async () => {
     console.log('http://localhost:3000')
+    if (cli.flags.open) {
+        await open('http://localhost:3000', { app: { name: 'google chrome' } });
+    }
 })
