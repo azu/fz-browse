@@ -95,28 +95,30 @@ export async function createServer({
     
     app.use('*', async (req, res) => {
         try {
-            const url = req.originalUrl
+            const originalUrl = req.originalUrl
             let template, render
             if (!isProd) {
                 // always read fresh template in dev
                 template = fs.readFileSync(resolve('index.html'), 'utf-8')
-                template = await vite.transformIndexHtml(url, template)
+                template = await vite.transformIndexHtml(originalUrl, template)
                 render = (await vite.ssrLoadModule('/src/entry-server.tsx')).render
             } else {
                 template = indexProd
                 render = await import('./dist/server/entry-server.js').then(_ => _.render)
             }
-            
             const context = {}
-            const appHtml = render(url, context)
+            const appHtml = render(originalUrl, context)
             
             if (context.url) {
                 // Somewhere a `<Redirect>` was rendered
                 return res.redirect(301, context.url)
             }
             
-            const html = template.replace(`<!--app-html-->`, appHtml)
-            
+            const html = template
+                .replace(`<!--app-html-->`, appHtml)
+                .replace(`{{props.initialData}}`, JSON.stringify({
+                    cwd: url.pathToFileURL(cwd),
+                }))
             res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
         } catch (e) {
             !isProd && vite.ssrFixStacktrace(e)

@@ -1,5 +1,4 @@
-import { Link, Route, Switch } from 'react-router-dom'
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, VFC } from "react";
 
 // Auto generates routes from files under ./pages
 // https://vitejs.dev/guide/features.html#glob-import
@@ -15,9 +14,14 @@ const routes = Object.keys(pages).map((path) => {
     }
 })
 
-export function App() {
-    const [input, setInput] = useState<string>("")
+export type AppProps = {
+    cwd: string;
+    initialInput?: string;
+}
+export const App: VFC<AppProps> = (props) => {
+    const [input, setInput] = useState<string>(props.initialInput ?? "")
     const [texts, setTexts] = useState<string[]>([])
+    const [preview, setPreview] = useState<string>("")
     useEffect(() => {
         setTexts([]);
     }, [input])
@@ -52,12 +56,14 @@ export function App() {
         const res = await fetchPromise;
         const reader = res?.getReader();
 
+        let p =""
         function read() {
             reader?.read().then(({ value, done }) => {
                     if (value) {
-                        console.log(value);
+                        p += value +"\n";
                     }
                     if (done) {
+                        setPreview(p);
                         return;
                     }
                     read();
@@ -125,9 +131,17 @@ export function App() {
     return (
         <>
             <input type={"text"} value={input} onChange={(event) => setInput(event.target.value)}/>
-            {texts.slice(-100).map((text, index) => {
-                return <li key={index} onClick={() => onPreview(text)}>{text}</li>
-            })}
+            <div style={{ display: "flex" }}>
+                <div style={{ flex: 1 }}>
+                    {texts.slice(-100).map((text, index) => {
+                        return <li key={index} onClick={() => onPreview(text)}><a href={props.cwd + text}>{text}</a>
+                        </li>
+                    })}
+                </div>
+                <pre>
+                    {preview}
+                </pre>
+            </div>
         </>
     )
 }
