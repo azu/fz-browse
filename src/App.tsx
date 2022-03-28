@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, VFC } from "react";
+import Ansi from "ansi-to-react";
 
 // Auto generates routes from files under ./pages
 // https://vitejs.dev/guide/features.html#glob-import
@@ -16,10 +17,10 @@ const routes = Object.keys(pages).map((path) => {
 
 export type AppProps = {
     cwd: string;
-    initialInput?: string;
+    initialQuery?: string;
 }
 export const App: VFC<AppProps> = (props) => {
-    const [input, setInput] = useState<string>(props.initialInput ?? "")
+    const [input, setInput] = useState<string>(props.initialQuery ?? "")
     const [texts, setTexts] = useState<string[]>([])
     const [preview, setPreview] = useState<string[]>([])
     useEffect(() => {
@@ -28,7 +29,10 @@ export const App: VFC<AppProps> = (props) => {
     }, [input])
     const onPreview = useCallback(async (item) => {
         let textBuffer = '';
-        const push = (line: string) => {
+        const push = (line?: string) => {
+            if (line === undefined) {
+                return;
+            }
             setPreview(texts => texts.concat(line));
         }
         const controller = new AbortController()
@@ -46,9 +50,7 @@ export const App: VFC<AppProps> = (props) => {
         }).then(reader => {
             function readChunk({ done, value }: ReadableStreamDefaultReadResult<any>) {
                 if (done) {
-                    if (textBuffer) {
-                        push(textBuffer)
-                    }
+                    push(textBuffer)
                     return;
                 }
                 textBuffer += decoder.decode(value);
@@ -73,7 +75,10 @@ export const App: VFC<AppProps> = (props) => {
         const controller = new AbortController()
         const signal = controller.signal
         let textBuffer = '';
-        const push = (line: string) => {
+        const push = (line?: string) => {
+            if (line === undefined) {
+                return;
+            }
             setTexts(texts => texts.concat(line));
         }
         const decoder = new TextDecoder();
@@ -89,9 +94,7 @@ export const App: VFC<AppProps> = (props) => {
         }).then(reader => {
             function readChunk({ done, value }: ReadableStreamDefaultReadResult<any>) {
                 if (done) {
-                    if (textBuffer) {
-                        push(textBuffer)
-                    }
+                    push(textBuffer)
                     return;
                 }
                 textBuffer += decoder.decode(value);
@@ -115,16 +118,18 @@ export const App: VFC<AppProps> = (props) => {
     return (
         <>
             <input type={"text"} value={input} onChange={(event) => setInput(event.target.value)}/>
-            <div style={{ display: "flex" }}>
+            <div style={{ display: "flex", }}>
                 <div style={{ flex: 1, maxWidth: "50%" }}>
                     {texts.slice(-100).map((text, index) => {
                         return <li key={index} onClick={() => onPreview(text)}><a>{text}</a>
                         </li>
                     })}
                 </div>
-                <pre style={{ flex: 1, maxWidth: "50%" }}>
-                    {preview.join("\n")}
-                </pre>
+                <div style={{ flex: 1, maxWidth: "50%", overflowY: "auto", height: "100vh" }}>
+                    {preview.slice(-100).map((item, index) => {
+                        return <p key={index + item} style={{ lineHeight: 1.5, margin: 0 }}><Ansi>{item}</Ansi></p>
+                    })}
+                </div>
             </div>
         </>
     )

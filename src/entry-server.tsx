@@ -4,7 +4,8 @@ import { App } from './App'
 import type { StaticRouterContext } from "react-router";
 
 const initialData = {
-    initialInput: ""
+    initialQuery: "",
+    cwd: ""
 }
 
 export function render(url: string, context: StaticRouterContext) {

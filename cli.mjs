@@ -37,6 +37,9 @@ const cli = meow(
             preview: {
                 type: "string",
             },
+            query: {
+                type: "string",
+            },
             open: {
                 type: "boolean",
             }
@@ -49,6 +52,7 @@ const cli = meow(
 const server = await createServer({
     cwd: cli.flags.cwd,
     run: cli.flags.run,
+    query: cli.flags.query,
     preview: cli.flags.preview,
 });
 server.app.listen(3000, async () => {

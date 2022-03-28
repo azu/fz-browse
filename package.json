@@ -13,6 +13,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "ansi-to-react": "^6.1.6",
     "execa": "^6.1.0",
     "meow": "^10.1.2",
     "open": "^8.4.0",

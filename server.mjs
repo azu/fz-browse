@@ -14,6 +14,7 @@ const isTest = process.env.NODE_ENV === 'test'
 export async function createServer({
                                        cwd,
                                        run,
+                                       query,
                                        preview,
                                        root = process.cwd(),
                                        isProd = process.env.NODE_ENV === 'production'
@@ -118,6 +119,7 @@ export async function createServer({
                 .replace(`<!--app-html-->`, appHtml)
                 .replace(`{{props.initialData}}`, JSON.stringify({
                     cwd: url.pathToFileURL(cwd),
+                    initialQuery: query
                 }))
             res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
         } catch (e) {
