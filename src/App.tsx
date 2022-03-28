@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState, VFC } from "react";
 import Ansi from "ansi-to-react";
-import { resolveCname } from "dns";
 
 // Auto generates routes from files under ./pages
 // https://vitejs.dev/guide/features.html#glob-import
