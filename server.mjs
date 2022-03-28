@@ -4,7 +4,7 @@ import express from "express";
 import path from "path";
 import url from "url";
 import { execa } from "execa";
-import readline from "readline";
+import serveStatic from "serve-static";
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -51,14 +51,13 @@ export async function createServer({
         app.use(vite.middlewares)
     } else {
         const compression = await import('compression').then(_ => _.default);
-        const serveStatic = await import('serve-static').then(_ => _.default);
         app.use(compression())
         app.use(serveStatic(resolve('dist/client'), {
                 index: false
             })
         )
     }
-    
+    app.use("/public", serveStatic(path.join(__dirname, 'public')))
     app.get('/stream', async (req, res) => {
         const input = req.query.input;
         if (!input) {
@@ -92,7 +91,14 @@ export async function createServer({
         });
         ret.stdout.pipe(res);
     });
-    
+    app.get('/file/:filepath', async (req, res) => {
+        const filepath = decodeURIComponent(req.params.filepath);
+        if (!filepath) {
+            return res.end();
+        }
+        const actualFilePath = path.join(cwd, filepath);
+        res.sendFile(actualFilePath);
+    });
     
     app.use('*', async (req, res) => {
         try {

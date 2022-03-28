@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, VFC } from "react";
 import Ansi from "ansi-to-react";
+import { resolveCname } from "dns";
 
 // Auto generates routes from files under ./pages
 // https://vitejs.dev/guide/features.html#glob-import
@@ -30,7 +31,7 @@ export const App: VFC<AppProps> = (props) => {
     const onPreview = useCallback(async (item) => {
         let textBuffer = '';
         const push = (line?: string) => {
-            if (line === undefined) {
+            if (!line) {
                 return;
             }
             setPreview(texts => texts.concat(line));
@@ -76,7 +77,7 @@ export const App: VFC<AppProps> = (props) => {
         const signal = controller.signal
         let textBuffer = '';
         const push = (line?: string) => {
-            if (line === undefined) {
+            if (!line) {
                 return;
             }
             setTexts(texts => texts.concat(line));
@@ -121,7 +122,14 @@ export const App: VFC<AppProps> = (props) => {
             <div style={{ display: "flex", }}>
                 <div style={{ flex: 1, maxWidth: "50%" }}>
                     {texts.slice(-100).map((text, index) => {
-                        return <li key={index} onClick={() => onPreview(text)}><a>{text}</a>
+                        const fileUrl = encodeURIComponent(location.origin + "/file/" + encodeURIComponent(text))
+                        return <li key={index}>
+                            {text.endsWith(".pdf")
+                                ?
+                                <a href={`/public/pdf/web/viewer.html?file=${fileUrl}#search=${encodeURIComponent(input)}`}>{text}</a>
+                                :
+                                <a href={`/public/epub/index.html?file=${fileUrl}&search=${encodeURIComponent(input)}`}>{text}</a>
+                            }
                         </li>
                     })}
                 </div>
