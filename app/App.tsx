@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState, VFC } from "react";
-import Ansi from "ansi-to-react";
 import { ParsedTSVLine, parseTSVLine } from "./lib/tsv-parse";
 import { useLazyState } from "./hooks/useLazyState";
 
@@ -27,7 +26,6 @@ export const App: VFC<AppProps> = (props) => {
     const highlightKeyword = useMemo(() => {
         return input.split(/[\^\[\]().+*$]/);
     }, [input]);
-    console.log("highlightKeyword", highlightKeyword)
     const [tsvList, setTsvList] = useLazyState<ParsedTSVLine[]>([])
     const [preview, setPreview] = useState<string[]>([])
     useEffect(() => {
