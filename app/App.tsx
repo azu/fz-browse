@@ -1,6 +1,9 @@
-import { useCallback, useEffect, useState, VFC } from "react";
+import { useCallback, useEffect, useMemo, useState, VFC } from "react";
 import Ansi from "ansi-to-react";
+import { ParsedTSVLine, parseTSVLine } from "./lib/tsv-parse";
+import { useLazyState } from "./hooks/useLazyState";
 
+import Highlighter from "react-highlight-words";
 // Auto generates routes from files under ./pages
 // https://vitejs.dev/guide/features.html#glob-import
 // @ts-ignore
@@ -21,10 +24,14 @@ export type AppProps = {
 }
 export const App: VFC<AppProps> = (props) => {
     const [input, setInput] = useState<string>(props.initialQuery ?? "")
-    const [texts, setTexts] = useState<string[]>([])
+    const highlightKeyword = useMemo(() => {
+        return input.split(/[\^\[\]().+*$]/);
+    }, [input]);
+    console.log("highlightKeyword", highlightKeyword)
+    const [tsvList, setTsvList] = useLazyState<ParsedTSVLine[]>([])
     const [preview, setPreview] = useState<string[]>([])
     useEffect(() => {
-        setTexts([]);
+        setTsvList([]);
         setPreview([]);
     }, [input])
     const onPreview = useCallback(async (item) => {
@@ -70,16 +77,18 @@ export const App: VFC<AppProps> = (props) => {
             controller.abort();
             setPreview([]);
         }
-    }, [input])
+    }, [input]);
+    // stream
     useEffect(() => {
         const controller = new AbortController()
         const signal = controller.signal
         let textBuffer = '';
-        const push = (line?: string) => {
-            if (!line) {
+        const push = (tsv: null | ParsedTSVLine) => {
+            console.log(tsv);
+            if (!tsv) {
                 return;
             }
-            setTexts(texts => texts.concat(line));
+            setTsvList(texts => texts.concat([tsv]));
         }
         const decoder = new TextDecoder();
         fetch(`/stream?input=${encodeURIComponent(input)}`, { signal }).then((res) => {
@@ -94,50 +103,68 @@ export const App: VFC<AppProps> = (props) => {
         }).then(reader => {
             function readChunk({ done, value }: ReadableStreamDefaultReadResult<any>) {
                 if (done) {
-                    push(textBuffer)
+                    push(parseTSVLine(textBuffer))
                     return;
                 }
                 textBuffer += decoder.decode(value);
                 const lines = textBuffer.split('\n');
                 for (const line of lines.slice(0, -1)) {
-                    push(line);
+                    push(parseTSVLine(line));
                 }
                 textBuffer = lines.slice(-1)[0];
                 // next
                 reader.read().then(readChunk);
             }
 
-            setTexts([]);
+            setTsvList([]);
             reader.read().then(readChunk);
         });
         return () => {
             controller.abort();
-            setTexts([]);
+            setTsvList([]);
         }
     }, [input])
     return (
-        <>
-            <input type={"text"} value={input} onChange={(event) => setInput(event.target.value)}/>
-            <div style={{ display: "flex", }}>
-                <div style={{ flex: 1, maxWidth: "50%" }}>
-                    {texts.slice(-100).map((text, index) => {
-                        const fileUrl = encodeURIComponent(location.origin + "/file/" + encodeURIComponent(text))
-                        return <li key={index}>
-                            {text.endsWith(".pdf")
-                                ?
-                                <a href={`/public/pdf/web/viewer.html?file=${fileUrl}#search=${encodeURIComponent(input)}`}>{text}</a>
-                                :
-                                <a href={`/public/epub/index.html?file=${fileUrl}&search=${encodeURIComponent(input)}`}>{text}</a>
-                            }
-                        </li>
-                    })}
-                </div>
-                <div style={{ flex: 1, maxWidth: "50%", overflowY: "auto", height: "100vh" }}>
-                    {preview.slice(-100).map((item, index) => {
-                        return <p key={index + item} style={{ lineHeight: 1.5, margin: 0 }}><Ansi>{item}</Ansi></p>
-                    })}
-                </div>
+        <div>
+            <div style={{ display: "flex", alignContent: "center", alignItems: "center" }}>
+                <input type={"text"} value={input} onChange={(event) => setInput(event.target.value)}
+                       style={{ flex: 1 }}/>
             </div>
-        </>
+            <div style={{ display: "flex", }}>
+                <div style={{ flex: 1 }}>
+                    {tsvList.slice(0, 200).map((tsv, index) => {
+                        const filePath = tsv[0];
+                        const content = tsv[1];
+                        if (!filePath) {
+                            return;
+                        }
+                        const fileUrl = encodeURIComponent(location.origin + "/file/" + encodeURIComponent(filePath));
+                        if (!content) {
+                            return <h2 key={index}>
+                                {filePath.endsWith(".pdf")
+                                    ?
+                                    <a href={`/public/pdf/web/viewer.html?file=${fileUrl}#search=${encodeURIComponent(input)}`}>{filePath}</a>
+                                    :
+                                    <a href={`/public/epub/index.html?file=${fileUrl}&search=${encodeURIComponent(input)}`}>{filePath}</a>
+                                }
+                            </h2>
+                        } else {
+                            // content
+                            return <p key={index}><Highlighter
+                                highlightClassName="HighlightKeyWord"
+                                searchWords={highlightKeyword}
+                                autoEscape={true}
+                                textToHighlight={content}
+                            /></p>
+                        }
+                    })}
+                </div>
+                {/*<div style={{ flex: 1, maxWidth: "50%", overflowY: "auto", height: "100vh" }}>*/}
+                {/*    {preview.slice(-100).map((item, index) => {*/}
+                {/*        return <p key={index + item} style={{ lineHeight: 1.5, margin: 0 }}><Ansi>{item}</Ansi></p>*/}
+                {/*    })}*/}
+                {/*</div>*/}
+            </div>
+        </div>
     )
 }
