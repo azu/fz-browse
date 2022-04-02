@@ -1,15 +1,28 @@
-import { useCallback, useEffect, useState } from "react";
-import { useDebounce } from "./useDebounce";
-import { debounce } from "@github/mini-throttle";
+import { SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 
 export function useLazyState<T>(defaultValue: T) {
-    const [state, setState] = useState(defaultValue);
+    const state = useRef<T>(defaultValue);
+    const timer = useRef<any>(null);
+    const setState = useCallback((s: SetStateAction<T>) => {
+        // @ts-ignore
+        state.current = typeof s === "function" ? s(state.current) : s;
+    }, [])
     const [lazyState, setLazyState] = useState(defaultValue);
-    const syncState = useCallback(debounce((state: T) => {
-        setLazyState(state)
-    }, 100, { start: true, middle: true }), [])
+    const startTimer = useCallback(() => {
+        return setInterval(() => {
+            setLazyState(state.current);
+        }, 100);
+    }, [])
     useEffect(() => {
-        syncState(state)
+        timer.current = startTimer();
+        return () => {
+            clearInterval(timer.current);
+        }
     }, [state])
-    return [lazyState, setState] as const;
+    const resetState = useCallback(() => {
+        state.current = defaultValue;
+        clearInterval(timer.current);
+        timer.current = startTimer();
+    }, [timer])
+    return [lazyState, { setState, resetState }] as const;
 }

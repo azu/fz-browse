@@ -26,10 +26,10 @@ export const App: VFC<AppProps> = (props) => {
     const highlightKeyword = useMemo(() => {
         return input.split(/[\^\[\]().+*$]/);
     }, [input]);
-    const [tsvList, setTsvList] = useLazyState<ParsedTSVLine[]>([])
+    const [tsvList, { setState: setTsvList, resetState: restTsvList }] = useLazyState<ParsedTSVLine[]>([])
     const [preview, setPreview] = useState<string[]>([])
     useEffect(() => {
-        setTsvList([]);
+        restTsvList()
         setPreview([]);
     }, [input])
     const onPreview = useCallback(async (item) => {
@@ -68,12 +68,13 @@ export const App: VFC<AppProps> = (props) => {
                 reader.read().then(readChunk);
             }
 
+            restTsvList();
             setPreview([]);
             reader.read().then(readChunk);
         });
         return () => {
             controller.abort();
-            setPreview([]);
+            restTsvList();
         }
     }, [input]);
     // stream
@@ -82,7 +83,6 @@ export const App: VFC<AppProps> = (props) => {
         const signal = controller.signal
         let textBuffer = '';
         const push = (tsv: null | ParsedTSVLine) => {
-            console.log(tsv);
             if (!tsv) {
                 return;
             }
@@ -114,12 +114,12 @@ export const App: VFC<AppProps> = (props) => {
                 reader.read().then(readChunk);
             }
 
-            setTsvList([]);
+            restTsvList();
             reader.read().then(readChunk);
         });
         return () => {
             controller.abort();
-            setTsvList([]);
+            restTsvList()
         }
     }, [input])
     return (
@@ -130,7 +130,7 @@ export const App: VFC<AppProps> = (props) => {
             </div>
             <div style={{ display: "flex", }}>
                 <div style={{ flex: 1 }}>
-                    {tsvList.slice(0, 200).map((tsv, index) => {
+                    {tsvList.slice(0, 100).map((tsv, index) => {
                         const filePath = tsv[0];
                         const content = tsv[1];
                         if (!filePath) {

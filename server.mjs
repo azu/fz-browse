@@ -72,6 +72,11 @@ export async function createServer({
             // https://stackoverflow.com/questions/68947940/node-js-child-process-is-not-giving-any-response-or-any-error
             stdio: ['ignore', 'pipe', 'pipe']
         });
+        res.on("close", () => {
+            ret.kill('SIGTERM', {
+                forceKillAfterTimeout: 100
+            })
+        });
         ret.stdout.pipe(res);
     });
     app.get('/preview', async (req, res) => {
@@ -88,6 +93,11 @@ export async function createServer({
             shell: true,
             // https://stackoverflow.com/questions/68947940/node-js-child-process-is-not-giving-any-response-or-any-error
             stdio: ['ignore', 'pipe', 'pipe']
+        });
+        res.on("close", () => {
+            ret.kill('SIGTERM', {
+                forceKillAfterTimeout: 100
+            })
         });
         ret.stdout.pipe(res);
     });
