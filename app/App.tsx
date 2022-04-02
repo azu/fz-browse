@@ -124,9 +124,20 @@ export const App: VFC<AppProps> = (props) => {
     }, [input])
     return (
         <div>
-            <div style={{ display: "flex", alignContent: "center", alignItems: "center" }}>
-                <input type={"text"} value={input} onChange={(event) => setInput(event.target.value)}
-                       style={{ flex: 1 }}/>
+            <div style={{
+                display: "flex",
+                alignContent: "center",
+                alignItems: "center",
+                position: "sticky",
+                top: 0,
+                padding: "12px 0",
+                background: "var(--nc-bg-1)",
+                borderBottom: "solid 1px var(--nc-bg-2)"
+            }}>
+                <input type={"text"}
+                       value={input}
+                       onChange={(event) => setInput(event.target.value)}
+                       style={{ flex: 1, borderRadius: "10px",padding: "8px" }}/>
             </div>
             <div style={{ display: "flex", }}>
                 <div style={{ flex: 1 }}>
