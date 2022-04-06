@@ -5,10 +5,13 @@ import path from "path";
 import url from "url";
 import { execa } from "execa";
 import serveStatic from "serve-static";
+import csrf from "csurf";
+import cookieParser from "cookie-parser";
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const csrfProtection = csrf({ cookie: true })
 const isTest = process.env.NODE_ENV === 'test'
 
 export async function createServer({
@@ -27,7 +30,7 @@ export async function createServer({
         : ''
     
     const app = express()
-    
+    app.use(cookieParser())
     /**
      * @type {import('vite').ViteDevServer}
      */
@@ -58,7 +61,7 @@ export async function createServer({
         )
     }
     app.use("/public", serveStatic(path.join(__dirname, 'public')))
-    app.get('/stream', async (req, res) => {
+    app.get('/stream', csrfProtection, async (req, res) => {
         const input = req.query.input;
         if (!input) {
             return res.end();
@@ -79,7 +82,7 @@ export async function createServer({
         });
         ret.stdout.pipe(res);
     });
-    app.get('/preview', async (req, res) => {
+    app.get('/preview', csrfProtection, async (req, res) => {
         const input = req.query.input;
         const result = req.query.result;
         if (!input) {
@@ -101,7 +104,7 @@ export async function createServer({
         });
         ret.stdout.pipe(res);
     });
-    app.get('/file/:filepath', async (req, res) => {
+    app.get('/file/:filepath', csrfProtection, async (req, res) => {
         const filepath = decodeURIComponent(req.params.filepath);
         if (!filepath) {
             return res.end();
@@ -110,7 +113,7 @@ export async function createServer({
         res.sendFile(actualFilePath);
     });
     
-    app.use('*', async (req, res) => {
+    app.use('*', csrfProtection, async (req, res) => {
         try {
             const originalUrl = req.originalUrl
             let template, render
@@ -135,7 +138,8 @@ export async function createServer({
                 .replace(`<!--app-html-->`, appHtml)
                 .replace(`{{props.initialData}}`, JSON.stringify({
                     cwd: url.pathToFileURL(cwd),
-                    initialQuery: query
+                    initialQuery: query,
+                    csrfToken: req.csrfToken()
                 }))
             res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
         } catch (e) {

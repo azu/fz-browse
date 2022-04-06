@@ -20,6 +20,7 @@ const routes = Object.keys(pages).map((path) => {
 export type AppProps = {
     cwd: string;
     initialQuery?: string;
+    csrfToken: string;
 }
 export const App: VFC<AppProps> = (props) => {
     const [input, setInput] = useState<string>(props.initialQuery ?? "")
@@ -43,7 +44,12 @@ export const App: VFC<AppProps> = (props) => {
         const controller = new AbortController()
         const signal = controller.signal
         const decoder = new TextDecoder();
-        fetch(`/preview?input=${encodeURIComponent(input)}&result=${encodeURIComponent(item)}`, { signal }).then((res) => {
+        fetch(`/preview?input=${encodeURIComponent(input)}&result=${encodeURIComponent(item)}`, {
+            headers: {
+                'CSRF-Token': props.csrfToken
+            },
+            signal
+        }).then((res) => {
             // Verify that we have some sort of 2xx response that we can use
             if (!res.ok) {
                 throw res;
@@ -89,7 +95,11 @@ export const App: VFC<AppProps> = (props) => {
             setTsvList(texts => texts.concat([tsv]));
         }
         const decoder = new TextDecoder();
-        fetch(`/stream?input=${encodeURIComponent(input)}`, { signal }).then((res) => {
+        fetch(`/stream?input=${encodeURIComponent(input)}`, {
+            headers: {
+                'CSRF-Token': props.csrfToken
+            }, signal
+        }).then((res) => {
             // Verify that we have some sort of 2xx response that we can use
             if (!res.ok) {
                 throw res;
@@ -137,7 +147,7 @@ export const App: VFC<AppProps> = (props) => {
                 <input type={"text"}
                        value={input}
                        onChange={(event) => setInput(event.target.value)}
-                       style={{ flex: 1, borderRadius: "10px",padding: "8px" }}/>
+                       style={{ flex: 1, borderRadius: "10px", padding: "8px" }}/>
             </div>
             <div style={{ display: "flex", }}>
                 <div style={{ flex: 1 }}>
