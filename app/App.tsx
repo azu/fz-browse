@@ -6,12 +6,14 @@ import {
     VFC,
     startTransition,
     useDeferredValue,
-    useTransition
+    useTransition, ReactNode, FC
 } from "react";
 import { ParsedTSVLine, parseTSVLine } from "./lib/tsv-parse";
-import { useLazyState } from "./hooks/useLazyState";
 
 import Highlighter from "react-highlight-words";
+import { BrowserRouter, Link, useRoutes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router";
+import PdfPreview from "./preview/PdfPreview";
 // Auto generates routes from files under ./pages
 // https://vitejs.dev/guide/features.html#glob-import
 // @ts-ignore
@@ -31,7 +33,7 @@ export type AppProps = {
     initialQuery?: string;
     csrfToken: string;
 }
-export const App: VFC<AppProps> = (props) => {
+export const Main: VFC<AppProps> = (props) => {
     const [input, setInput] = useState<string>(props.initialQuery ?? "")
     const highlightKeyword = useMemo(() => {
         return input.split(/[\^\[\]().+*$]/);
@@ -189,7 +191,13 @@ export const App: VFC<AppProps> = (props) => {
                             return <h2 key={index}>
                                 {filePath.endsWith(".pdf")
                                     ?
-                                    <a href={`/public/pdf/web/viewer.html?file=${fileUrl}#search=${encodeURIComponent(input)}`}>{filePath}</a>
+                                    <Link to={{
+                                        pathname: "/preview",
+                                        search: new URLSearchParams([
+                                            ["target", fileUrl],
+                                            ["input", input]
+                                        ]).toString()
+                                    }}>{filePath}</Link>
                                     :
                                     <a href={`/public/epub/index.html?file=${fileUrl}&search=${encodeURIComponent(input)}`}>{filePath}</a>
                                 }
@@ -215,4 +223,24 @@ export const App: VFC<AppProps> = (props) => {
             </div>
         </div>
     )
+}
+
+export const Preview = () => {
+    const { search } = useLocation();
+    const params = new URLSearchParams(search);
+    const input = params.get("input");
+    const target = params.get("target");
+    if (!input) {
+        throw new Error("require ?input")
+    }
+    if (!target) {
+        throw new Error("require ?target")
+    }
+    return <PdfPreview input={input} target={target}/>;
+}
+export const App: FC<AppProps> = (props) => {
+    return <Routes>
+        <Route index element={<Main {...props}/>}/>
+        <Route path={"/preview"} element={<Preview/>}/>
+    </Routes>
 }

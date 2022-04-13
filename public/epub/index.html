@@ -17,7 +17,6 @@
 <script type="module">
     const epubUrl = new URL(location.href).searchParams.get("file");
     const search = new URL(location.href).searchParams.get("search");
-    console.log("epubUrl", epubUrl)
     const book = ePub(epubUrl);
     const rendition = book.renderTo("area", {
         width: "100%",
