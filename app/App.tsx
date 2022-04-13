@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useMemo, useState, VFC } from "react";
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+    VFC,
+    startTransition,
+    useDeferredValue,
+    useTransition
+} from "react";
 import { ParsedTSVLine, parseTSVLine } from "./lib/tsv-parse";
 import { useLazyState } from "./hooks/useLazyState";
 
@@ -27,13 +36,14 @@ export const App: VFC<AppProps> = (props) => {
     const highlightKeyword = useMemo(() => {
         return input.split(/[\^\[\]().+*$]/);
     }, [input]);
-    const [tsvList, { setState: setTsvList, resetState: restTsvList }] = useLazyState<ParsedTSVLine[]>([])
+    const [isPending, startTransition] = useTransition();
+    const [tsvList, setTsvList] = useState<ParsedTSVLine[]>([])
     const [preview, setPreview] = useState<string[]>([])
     useEffect(() => {
-        restTsvList()
+        setTsvList([])
         setPreview([]);
     }, [input])
-    const onPreview = useCallback(async (item) => {
+    const onPreview = useCallback(async (item: string) => {
         let textBuffer = '';
         const push = (line?: string) => {
             if (!line) {
@@ -71,16 +81,20 @@ export const App: VFC<AppProps> = (props) => {
                 }
                 textBuffer = lines.slice(-1)[0];
                 // next
-                reader.read().then(readChunk);
+                reader.read().then(readChunk).catch(() => {
+                    // skip
+                })
             }
 
-            restTsvList();
+            setTsvList([]);
             setPreview([]);
-            reader.read().then(readChunk);
+            reader.read().then(readChunk).catch(() => {
+                // skip
+            })
         });
         return () => {
             controller.abort();
-            restTsvList();
+            setTsvList([]);
         }
     }, [input]);
     // stream
@@ -92,7 +106,9 @@ export const App: VFC<AppProps> = (props) => {
             if (!tsv) {
                 return;
             }
-            setTsvList(texts => texts.concat([tsv]));
+            startTransition(() => {
+                setTsvList(texts => texts.concat([tsv]));
+            })
         }
         const decoder = new TextDecoder();
         fetch(`/stream?input=${encodeURIComponent(input)}`, {
@@ -121,15 +137,25 @@ export const App: VFC<AppProps> = (props) => {
                 }
                 textBuffer = lines.slice(-1)[0];
                 // next
-                reader.read().then(readChunk);
+                reader.read().then(readChunk).catch(() => {
+                    // skip
+                })
             }
 
-            restTsvList();
-            reader.read().then(readChunk);
-        });
+            reader.read().then(readChunk).catch(() => {
+                // skip
+            })
+        }).catch(() => {
+            textBuffer = "";
+            startTransition(() => {
+                setTsvList([])
+            })
+        })
         return () => {
+            startTransition(() => {
+                setTsvList([])
+            })
             controller.abort();
-            restTsvList()
         }
     }, [input])
     return (
@@ -151,6 +177,7 @@ export const App: VFC<AppProps> = (props) => {
             </div>
             <div style={{ display: "flex", }}>
                 <div style={{ flex: 1 }}>
+                    {isPending && tsvList.length === 0 && <p>Loading...</p>}
                     {tsvList.slice(0, 100).map((tsv, index) => {
                         const filePath = tsv[0];
                         const content = tsv[1];
@@ -169,12 +196,14 @@ export const App: VFC<AppProps> = (props) => {
                             </h2>
                         } else {
                             // content
-                            return <p key={index}><Highlighter
-                                highlightClassName="HighlightKeyWord"
-                                searchWords={highlightKeyword}
-                                autoEscape={true}
-                                textToHighlight={content}
-                            /></p>
+                            return <p key={index}>
+                                <Highlighter
+                                    highlightClassName="HighlightKeyWord"
+                                    searchWords={highlightKeyword}
+                                    autoEscape={true}
+                                    textToHighlight={content}
+                                />
+                            </p>
                         }
                     })}
                 </div>

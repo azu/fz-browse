@@ -4,12 +4,13 @@ import { App } from './App'
 
 const initialData = {
     initialQuery: "",
-    cwd: ""
+    cwd: "",
+    csrfToken: ""
 }
 
 export function render(url: string) {
     return ReactDOMServer.renderToString(
-        <StaticRouter location={url} >
+        <StaticRouter location={url}>
             <App {...initialData} />
         </StaticRouter>
     )
