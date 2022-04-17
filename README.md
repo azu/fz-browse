@@ -162,7 +162,7 @@ Search Images using exiftool.
 - Requirements:
   - [ExifTool](https://exiftool.org/)
 
-```
+```shell
 fz-browse --run $'find -E . -iregex ".*\.(jpg|gif|png|jpeg)$" -print0 | xargs -0 exiftool -q -m -p \'$Directory/$Filename  $DateTimeOriginal  $Comment\' | grep {input} | awk \'{print $1}\'' --preview "echo {target}"
 ```
 
