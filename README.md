@@ -45,11 +45,11 @@ If you want to display content of the file in search result, `--run` command sho
 
 ```tsv
 /path/to/fileA
-/path/to/file\tContent of the file A1
-/path/to/file\tContent of the file A2
-/path/to/file\tContent of the file A3
+/path/to/fileA\tContent of the file A1
+/path/to/fileA\tContent of the file A2
+/path/to/fileA\tContent of the file A3
 /path/to/fileB
-/path/to/file\tContent of the file B1
+/path/to/fileB\tContent of the file B1
 ```
 
 It will be converted to following structure on view.
