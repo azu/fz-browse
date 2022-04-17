@@ -107,6 +107,8 @@ It will be converted to following structure on view.
 
 ## Recipes
 
+**Please add your Recipes to Wiki!**: <https://github.com/azu/fz-browse/wiki/Recipes>
+
 ### Search text contents
 
 Show [ripgrep](https://github.com/BurntSushi/ripgrep) search results 
