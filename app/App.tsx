@@ -190,13 +190,15 @@ export const Main: VFC<AppProps> = (props) => {
                         );
                     } else {
                         // content
+                        // TODO: content length hard limit
+                        const sliceContent = content.length > 3000 ? content.slice(0, 3000) + "…" : content;
                         return (
                             <p key={index}>
                                 <Highlighter
                                     highlightClassName="HighlightKeyWord"
                                     searchWords={highlightKeyword}
                                     autoEscape={true}
-                                    textToHighlight={content}
+                                    textToHighlight={sliceContent}
                                 />
                             </p>
                         );

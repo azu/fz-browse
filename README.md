@@ -28,16 +28,14 @@ It will be converted to following structure on view.
 ```markdown
 # /path/to/file
 
-Content of the file A1
-Content of the file A2
-Content of the file A3
+Content of the file A1 Content of the file A2 Content of the file A3
 
 # /path/to/fileB
 
 Content of the file B1
 ```
 
-Empty TSV line will be ignored.
+:memo: Empty TSV line will be ignored.
 
 ```tsv
 /path/to/fileA
@@ -47,15 +45,30 @@ Empty TSV line will be ignored.
 \t # This line will be ignored
 ```
 
-## Tips
+## Recipes
 
-jq support TSV.
+### Search text contents
 
-ripgrep-all + jq.
+- Requirements:
+  - [ripgrep](https://github.com/BurntSushi/ripgrep)
+  - [jq](https://stedolan.github.io/jq/)
 
+```shell
+fz-browse --run $'rg --ignore-case {input} --json | jq \'if .type == "begin" or .type == "match" then . else empty end | [.data.path.text, .data.lines.text] | @tsv\' -r' --preview "rg --context 5 {input} {target}"
 ```
-rga test --json | jq 'if .type == "begin" or .type == "match" then . else {} end | [.data.path.text, .data.lines.text] | @tsv'
+
+### Search PDF and epub books
+
+- Requirements:
+  - [ripgrep-all](https://github.com/phiresky/ripgrep-all)
+  - [jq](https://stedolan.github.io/jq/)
+
+```shell
+fz-browse --run $'rga --ignore-case {input} --json | jq \'if .type == "begin" or .type == "match" then . else empty end | [.data.path.text, .data.lines.text] | @tsv\' -r' --preview "rga --context 5 {input} {target}" --cwd "/Path/To/Your/BookDir"
 ```
+
+<details>
+<summary>Description</summary>
 
 It means that convert only "begin" and "match" JSON line to TSV.
 
@@ -66,3 +79,5 @@ else
   empty # remove this live
 end | [.data.path.text, .data.lines.text] | @tsv'
 ```
+
+</details>
