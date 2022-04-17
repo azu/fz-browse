@@ -7,6 +7,7 @@ import { Route, Routes } from "react-router";
 import { PdfPreview } from "./preview/PdfPreview";
 import { EpubPreview } from "./preview/EpubPreview";
 import { DefaultPreview } from "./preview/DefaultPreview";
+
 const useCustomSearchParams = () => {
     const [search, setSearch] = useSearchParams();
     const searchAsObject = useMemo(() => Object.fromEntries(
@@ -18,6 +19,7 @@ export type AppProps = {
     cwd: string;
     initialQuery?: string;
     csrfToken: string;
+    displayItemLimit: number;
 }
 export const Main: VFC<AppProps> = (props) => {
     const [searchAsObject, setSearchParams] = useCustomSearchParams();
@@ -117,47 +119,46 @@ export const Main: VFC<AppProps> = (props) => {
                 <input type={"text"}
                        value={input}
                        onChange={onInputChange}
+                       autoFocus={true}
                        style={{ flex: 1, borderRadius: "10px", padding: "8px" }}/>
+
             </div>
-            <div style={{ display: "flex", }}>
-                <div style={{ flex: 1 }}>
-                    {isPending && tsvList.length === 0 && <p>Loading...</p>}
-                    {tsvList.slice(0, 100).map((tsv, index) => {
-                        const filePath = tsv[0];
-                        const content = tsv[1];
-                        if (!filePath) {
-                            return;
-                        }
-                        const fileUrl = encodeURIComponent(location.origin + "/file/" + encodeURIComponent(filePath));
-                        if (!content) {
-                            return <h2 key={index}>
-                                <Link to={{
-                                    pathname: "/preview",
-                                    search: new URLSearchParams([
-                                        ["targetFilePath", filePath],
-                                        ["targetUrl", fileUrl],
-                                        ["input", input]
-                                    ]).toString()
-                                }}>{filePath}</Link>
-                            </h2>
-                        } else {
-                            // content
-                            return <p key={index}>
-                                <Highlighter
-                                    highlightClassName="HighlightKeyWord"
-                                    searchWords={highlightKeyword}
-                                    autoEscape={true}
-                                    textToHighlight={content}
-                                />
-                            </p>
-                        }
-                    })}
-                </div>
-                {/*<div style={{ flex: 1, maxWidth: "50%", overflowY: "auto", height: "100vh" }}>*/}
-                {/*    {preview.slice(-100).map((item, index) => {*/}
-                {/*        return <p key={index + item} style={{ lineHeight: 1.5, margin: 0 }}><Ansi>{item}</Ansi></p>*/}
-                {/*    })}*/}
-                {/*</div>*/}
+            <div>
+                <p style={{
+                    margin: 0,
+                    padding: 0,
+                    textAlign: "right"
+                }}>Hit: {Math.min(tsvList.length, props.displayItemLimit)}/{tsvList.length}</p>
+                {tsvList.slice(0, props.displayItemLimit).map((tsv, index) => {
+                    const filePath = tsv[0];
+                    const content = tsv[1];
+                    if (!filePath) {
+                        return;
+                    }
+                    const fileUrl = encodeURIComponent(location.origin + "/file/" + encodeURIComponent(filePath));
+                    if (!content) {
+                        return <h2 key={index}>
+                            <Link to={{
+                                pathname: "/preview",
+                                search: new URLSearchParams([
+                                    ["targetFilePath", filePath],
+                                    ["targetUrl", fileUrl],
+                                    ["input", input]
+                                ]).toString()
+                            }}>{filePath}</Link>
+                        </h2>
+                    } else {
+                        // content
+                        return <p key={index}>
+                            <Highlighter
+                                highlightClassName="HighlightKeyWord"
+                                searchWords={highlightKeyword}
+                                autoEscape={true}
+                                textToHighlight={content}
+                            />
+                        </p>
+                    }
+                })}
             </div>
         </div>
     )

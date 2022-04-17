@@ -19,6 +19,7 @@ export async function createServer({
                                        run,
                                        query,
                                        preview,
+                                       displayItemLimit = 500,
                                        root = process.cwd(),
                                        isProd = process.env.NODE_ENV === 'production'
     
@@ -139,7 +140,8 @@ export async function createServer({
                 .replace(`{{props.initialData}}`, JSON.stringify({
                     cwd: url.pathToFileURL(cwd),
                     initialQuery: query,
-                    csrfToken: req.csrfToken()
+                    csrfToken: req.csrfToken(),
+                    displayItemLimit: displayItemLimit
                 }))
             res.status(200).set({ 'Content-Type': 'text/html' }).end(html)
         } catch (e) {
@@ -150,12 +152,4 @@ export async function createServer({
     })
     
     return { app, vite }
-}
-
-if (!isTest) {
-    // createServer().then(({ app }) =>
-    //   app.listen(3000, () => {
-    //     console.log('http://localhost:3000')
-    //   })
-    // )
 }

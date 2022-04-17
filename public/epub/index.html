@@ -8,10 +8,19 @@
             height: 100%;
             width: 100%
         }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+        }
     </style>
 </head>
 <body>
 <div id="area"></div>
+<footer class="footer">
+    <button id="search-prev">←</button>
+    <button id="search-next">→</button>
+</footer>
 <script src="./jszip.js"></script>
 <script src="./epub.js"></script>
 <script type="module">
@@ -24,6 +33,8 @@
         height: "100%",
         manager: "continuous",
         flow: "scrolled",
+        allowScriptedContent: true,
+        allowPopups: true
     });
     const displayed = await rendition.display();
 
@@ -45,12 +56,32 @@
         const items = await doSearch(search);
         // highlight
         items.forEach(item => {
-            rendition.annotations.highlight(item.cfi, {}, (e) => {
-                console.log("highlight clicked", e.target);
-            });
+            console.log("item", item);
+            rendition.annotations.highlight(item.cfi);
         })
-        console.log("move to first");
-        rendition.display(items[0].cfi);
+        let currentItemIndex = 0;
+        // first item
+        rendition.display(items[currentItemIndex].cfi);
+        const searchNextButton = document.querySelector("#search-next");
+        const searchPrevButton = document.querySelector("#search-prev");
+        searchNextButton.addEventListener("click", () => {
+            if (currentItemIndex >= items.length) {
+                return;
+            }
+            const nextItem = items[++currentItemIndex];
+            if (nextItem) {
+                rendition.display(nextItem.cfi)
+            }
+        });
+        searchPrevButton.addEventListener("click", () => {
+            if (currentItemIndex <= 0) {
+                return;
+            }
+            const nextItem = items[--currentItemIndex];
+            if (nextItem) {
+                rendition.display(nextItem.cfi)
+            }
+        })
     }
 
 </script>

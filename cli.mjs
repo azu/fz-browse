@@ -40,8 +40,15 @@ const cli = meow(
             query: {
                 type: "string",
             },
+            browser: {
+                type: "string"
+            },
             open: {
                 type: "boolean",
+            },
+            displayItemLimit: {
+                type: "number",
+                default: 500
             }
         },
         autoHelp: true,
@@ -54,13 +61,16 @@ const server = await createServer({
     run: cli.flags.run,
     query: cli.flags.query,
     preview: cli.flags.preview,
+    displayItemLimit: cli.flags.displayItemLimit
 });
-server.app.listen(3000, async () => {
-    console.log('http://localhost:3000')
+const PORT = process.env.PORT ?? 0;
+const listener = server.app.listen(PORT, async () => {
+    console.log(`http://localhost:${listener.address().port}`)
     if (cli.flags.open) {
         const query = cli.flags.query ? "?" + new URLSearchParams([[
             "q", cli.flags.query
         ]]).toString() : ""
-        await open('http://localhost:3000' + query, { app: { name: 'google chrome' } });
+        const options = cli.flags.browser ? { app: { name: cli.flags.browser } } : {}
+        await open(`http://localhost:${listener.address().port}${query}`, options);
     }
-})
+});

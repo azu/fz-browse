@@ -21615,7 +21615,8 @@ function proxyMouse(target, tracked) {
     var _arr = ['mouseup', 'mousedown', 'click', 'touchstart'];
     for (var _i = 0; _i < _arr.length; _i++) {
         var ev = _arr[_i];
-        this.target.addEventListener(ev, function (e) {
+        // FIXME: azu edit
+        target.addEventListener(ev, function (e) {
             return dispatch(e);
         }, false);
     }
