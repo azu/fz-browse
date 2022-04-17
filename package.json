@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@github/mini-throttle": "^2.1.0",
-    "ansi-to-react": "^6.1.6",
     "cookie-parser": "^1.4.6",
     "csurf": "^1.11.0",
     "execa": "^6.1.0",
@@ -32,8 +31,7 @@
     "react-dom": "^18.0.0",
     "react-highlight-words": "^0.18.0",
     "react-router": "^6.3.0",
-    "react-router-dom": "^6.3.0",
-    "web-streams-polyfill": "^3.2.0"
+    "react-router-dom": "^6.3.0"
   },
   "devDependencies": {
     "@types/compression": "^1.7.2",
