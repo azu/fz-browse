@@ -1,9 +1,9 @@
 import { PreviewProps } from "./PreviewType";
 import { FC, useMemo } from "react";
 
-export const PdfPreview: FC<PreviewProps> = (props) => {
+export const EpubPreview: FC<PreviewProps> = (props) => {
     const viewerUrl = useMemo(() => {
-        return `/pdf/web/viewer.html?file=${props.target}#search=${encodeURIComponent(props.input)}`;
+        return `/epub/index.html?file=${props.target}&search=${encodeURIComponent(props.input)}`;
     }, [props])
     return <iframe src={viewerUrl} style={{
         width: "100vw",

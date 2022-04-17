@@ -12,11 +12,12 @@
 </head>
 <body>
 <div id="area"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
-<script src="https://unpkg.com/epubjs@0.3.93/dist/epub.min.js"></script>
+<script src="./jszip.js"></script>
+<script src="./epub.js"></script>
 <script type="module">
-    const epubUrl = new URL(location.href).searchParams.get("file");
-    const search = new URL(location.href).searchParams.get("search");
+    const url = new URL(location.href);
+    const epubUrl = url.searchParams.get("file");
+    const search = url.searchParams.get("search");
     const book = ePub(epubUrl);
     const rendition = book.renderTo("area", {
         width: "100%",
@@ -40,10 +41,8 @@
     }
 
     await book.ready.then();
-    console.log("ready")
     if (doSearch) {
         const items = await doSearch(search);
-        console.log("found items", items);
         // highlight
         items.forEach(item => {
             rendition.annotations.highlight(item.cfi, {}, (e) => {

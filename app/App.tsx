@@ -6,14 +6,16 @@ import {
     VFC,
     startTransition,
     useDeferredValue,
-    useTransition, ReactNode, FC
+    useTransition, ReactNode, FC, ChangeEventHandler
 } from "react";
 import { ParsedTSVLine, parseTSVLine } from "./lib/tsv-parse";
 
 import Highlighter from "react-highlight-words";
-import { BrowserRouter, Link, useRoutes } from "react-router-dom";
+import { BrowserRouter, Link, useNavigate, useRoutes, useSearchParams } from "react-router-dom";
 import { Route, Routes, useLocation } from "react-router";
-import PdfPreview from "./preview/PdfPreview";
+import { PdfPreview } from "./preview/PdfPreview";
+import { EpubPreview } from "./preview/EpubPreview";
+import { DefaultPreview } from "./preview/DefaultPreview";
 // Auto generates routes from files under ./pages
 // https://vitejs.dev/guide/features.html#glob-import
 // @ts-ignore
@@ -28,13 +30,21 @@ const routes = Object.keys(pages).map((path) => {
     }
 })
 
+const useCustomSearchParams = () => {
+    const [search, setSearch] = useSearchParams();
+    const searchAsObject = useMemo(() => Object.fromEntries(
+        new URLSearchParams(search)
+    ), [search]);
+    return [searchAsObject, setSearch] as const;
+};
 export type AppProps = {
     cwd: string;
     initialQuery?: string;
     csrfToken: string;
 }
 export const Main: VFC<AppProps> = (props) => {
-    const [input, setInput] = useState<string>(props.initialQuery ?? "")
+    const [searchAsObject, setSearchParams] = useCustomSearchParams();
+    const [input, setInput] = useState<string>(searchAsObject.q ?? "")
     const highlightKeyword = useMemo(() => {
         return input.split(/[\^\[\]().+*$]/);
     }, [input]);
@@ -45,6 +55,14 @@ export const Main: VFC<AppProps> = (props) => {
         setTsvList([])
         setPreview([]);
     }, [input])
+    const onInputChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+        const nextQuery = event.target.value;
+        setInput(nextQuery);
+        setSearchParams({
+            ...searchAsObject,
+            q: nextQuery
+        });
+    }
     const onPreview = useCallback(async (item: string) => {
         let textBuffer = '';
         const push = (line?: string) => {
@@ -174,7 +192,7 @@ export const Main: VFC<AppProps> = (props) => {
             }}>
                 <input type={"text"}
                        value={input}
-                       onChange={(event) => setInput(event.target.value)}
+                       onChange={onInputChange}
                        style={{ flex: 1, borderRadius: "10px", padding: "8px" }}/>
             </div>
             <div style={{ display: "flex", }}>
@@ -189,18 +207,13 @@ export const Main: VFC<AppProps> = (props) => {
                         const fileUrl = encodeURIComponent(location.origin + "/file/" + encodeURIComponent(filePath));
                         if (!content) {
                             return <h2 key={index}>
-                                {filePath.endsWith(".pdf")
-                                    ?
-                                    <Link to={{
-                                        pathname: "/preview",
-                                        search: new URLSearchParams([
-                                            ["target", fileUrl],
-                                            ["input", input]
-                                        ]).toString()
-                                    }}>{filePath}</Link>
-                                    :
-                                    <a href={`/public/epub/index.html?file=${fileUrl}&search=${encodeURIComponent(input)}`}>{filePath}</a>
-                                }
+                                <Link to={{
+                                    pathname: "/preview",
+                                    search: new URLSearchParams([
+                                        ["target", fileUrl],
+                                        ["input", input]
+                                    ]).toString()
+                                }}>{filePath}</Link>
                             </h2>
                         } else {
                             // content
@@ -225,18 +238,26 @@ export const Main: VFC<AppProps> = (props) => {
     )
 }
 
+
+const PreviewRoute = (props: { input: string; target: string; }) => {
+    if (props.target.endsWith(".pdf")) {
+        return <PdfPreview {...props} />;
+    } else if (props.target.endsWith(".epub")) {
+        return <EpubPreview {...props} />
+    }
+    return <DefaultPreview {...props} />
+}
 export const Preview = () => {
-    const { search } = useLocation();
-    const params = new URLSearchParams(search);
-    const input = params.get("input");
-    const target = params.get("target");
+    const [searchAsObject] = useCustomSearchParams();
+    const input = searchAsObject.input;
+    const target = searchAsObject.target;
     if (!input) {
         throw new Error("require ?input")
     }
     if (!target) {
         throw new Error("require ?target")
     }
-    return <PdfPreview input={input} target={target}/>;
+    return <PreviewRoute input={input} target={target}/>;
 }
 export const App: FC<AppProps> = (props) => {
     return <Routes>

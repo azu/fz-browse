@@ -6,6 +6,7 @@ const initialData = {
     initialQuery: "",
     cwd: "",
     csrfToken: ""
+
 }
 
 export function render(url: string) {

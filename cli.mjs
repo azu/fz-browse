@@ -58,6 +58,9 @@ const server = await createServer({
 server.app.listen(3000, async () => {
     console.log('http://localhost:3000')
     if (cli.flags.open) {
-        await open('http://localhost:3000', { app: { name: 'google chrome' } });
+        const query = cli.flags.query ? "?" + new URLSearchParams([[
+            "q", cli.flags.query
+        ]]).toString() : ""
+        await open('http://localhost:3000' + query, { app: { name: 'google chrome' } });
     }
 })
