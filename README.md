@@ -2,7 +2,7 @@
 
 fzf-like tool but view on browser.
 
-![](./docs/img/pdf-epub-search.mp4)
+https://user-images.githubusercontent.com/19714/163715229-e05b8a7e-7708-41a1-bd07-316a177d9f35.mp4
 
 ## Installation
 
@@ -165,7 +165,7 @@ Search Images using exiftool.
 fz-browse --run $'find -E . -iregex ".*\.(jpg|gif|png|jpeg)$" -print0 | xargs -0 exiftool -q -m -p \'$Directory/$Filename  $DateTimeOriginal  $Comment\' | grep {input} | awk \'{print $1}\'' --preview "echo {target}"
 ```
 
-![](./docs/img/image-search.mp4)
+https://user-images.githubusercontent.com/19714/163715237-e16cfafe-5e11-4d20-9398-1fbb5e845f7e.mp4
 
 ## Built-in Preview
 
