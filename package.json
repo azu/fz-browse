@@ -17,7 +17,8 @@
     "serve": "cross-env NODE_ENV=production node server.mjs",
     "debug": "node --inspect-brk server",
     "type-check": "tsc --noEmit",
-    "test": "vitest",
+    "test": "vitest run",
+    "dev:test": "vitest",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,css}\"",
     "prepare": "git config --local core.hooksPath .githooks"
   },
