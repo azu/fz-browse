@@ -70,9 +70,9 @@ It will be converted to following structure on view.
 
 ```tsv
 /path/to/fileA
-/path/to/file\tContent of the file A1
-/path/to/file\tContent of the file A2
-/path/to/file\tContent of the file A3
+/path/to/fileA\tContent of the file A1
+/path/to/fileA\tContent of the file A2
+/path/to/fileA\tContent of the file A3
 \t # This line will be ignored
 ```
 
