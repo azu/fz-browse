@@ -163,6 +163,12 @@ Search Images using exiftool.
 fz-browse --run $'find -E . -iregex ".*\.(jpg|gif|png|jpeg)$" -print0 | xargs -0 exiftool -q -m -p \'$Directory/$Filename  $DateTimeOriginal  $Comment\' | grep {input} | awk \'{print $1}\'' --preview "echo {target}"
 ```
 
+## Built-in Preview
+
+- PDF
+- epub
+- Image: png,jpe,jpeg,webp,gif
+
 ## Develop
 
     git clone https://github.com/azu/fz-browse
