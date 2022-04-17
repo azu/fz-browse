@@ -147,6 +147,7 @@ end | [.data.path.text, .data.lines.text] | @tsv'
 - Requirements:
   - [ripgrep](https://github.com/BurntSushi/ripgrep)
   - [jq](https://stedolan.github.io/jq/)
+  - Google Chrome/Firefox/MSEdge
 
 ```shell
 fz-browse --run $'rg --ignore-case {input} --json | jq \'if .type == "begin" or .type == "match" then . else empty end | [.data.path.text, .data.lines.text] | @tsv\' -r' --preview "rg --context 5 {input} {target}" --open --browser "google chrome"
