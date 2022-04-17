@@ -2,6 +2,8 @@
 
 fzf-like tool but view on browser.
 
+![](./docs/img/pdf-epub-search.mp4)
+
 ## Installation
 
     npm install --global fz-browse
@@ -162,6 +164,8 @@ Search Images using exiftool.
 ```
 fz-browse --run $'find -E . -iregex ".*\.(jpg|gif|png|jpeg)$" -print0 | xargs -0 exiftool -q -m -p \'$Directory/$Filename  $DateTimeOriginal  $Comment\' | grep {input} | awk \'{print $1}\'' --preview "echo {target}"
 ```
+
+![](./docs/img/image-search.mp4)
 
 ## Built-in Preview
 
