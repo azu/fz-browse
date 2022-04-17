@@ -38,6 +38,9 @@ export const Main: VFC<AppProps> = (props) => {
     }, [input]);
     const [isPending, startTransition] = useTransition();
     const [tsvList, setTsvList] = useSessionStorage<ParsedTSVLine[]>("fz-browser-session-results", []);
+    const hasResult = useMemo(() => {
+        return tsvList.length > 0;
+    }, []);
     const initialUpdate = useRef<boolean>(true);
     const navigationType = useNavigationType();
     useEffect(() => {
@@ -47,12 +50,6 @@ export const Main: VFC<AppProps> = (props) => {
         }
         setTsvList([]);
     }, [input, navigationType]);
-    useEffect(() => {
-        initialUpdate.current = false;
-        return () => {
-            initialUpdate.current = true;
-        };
-    }, []);
     const onInputChange: ChangeEventHandler<HTMLInputElement> = (event) => {
         const nextQuery = event.target.value;
         setInput(nextQuery);
@@ -64,7 +61,7 @@ export const Main: VFC<AppProps> = (props) => {
     // stream
     useEffect(() => {
         // for preserve scroll
-        if (initialUpdate.current && navigationType === Action.Pop) {
+        if (initialUpdate.current && navigationType === Action.Pop && hasResult) {
             return;
         }
         const controller = new AbortController();
@@ -136,7 +133,13 @@ export const Main: VFC<AppProps> = (props) => {
             setTsvList([]);
             controller.abort();
         };
-    }, [input, navigationType]);
+    }, [input, navigationType, hasResult]);
+    useEffect(() => {
+        initialUpdate.current = false;
+        return () => {
+            initialUpdate.current = true;
+        };
+    }, []);
     return (
         <div
             style={{
