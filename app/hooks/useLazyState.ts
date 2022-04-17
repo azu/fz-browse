@@ -6,23 +6,23 @@ export function useLazyState<T>(defaultValue: T) {
     const setState = useCallback((s: SetStateAction<T>) => {
         // @ts-ignore
         state.current = typeof s === "function" ? s(state.current) : s;
-    }, [])
+    }, []);
     const [lazyState, setLazyState] = useState(defaultValue);
     const startTimer = useCallback(() => {
         return setInterval(() => {
             setLazyState(state.current);
         }, 100);
-    }, [])
+    }, []);
     useEffect(() => {
         timer.current = startTimer();
         return () => {
             clearInterval(timer.current);
-        }
-    }, [state])
+        };
+    }, [state]);
     const resetState = useCallback(() => {
         state.current = defaultValue;
         clearInterval(timer.current);
         timer.current = startTimer();
-    }, [timer])
+    }, [timer]);
     return [lazyState, { setState, resetState }] as const;
 }

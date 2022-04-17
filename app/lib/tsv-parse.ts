@@ -14,19 +14,19 @@ export const parseTSVLine = (line: string): ParsedTSVLine | null => {
         return null;
     }
     if (items[0] !== "" && items[1] === undefined) {
-        return [items[0], ""]
+        return [items[0], ""];
     }
     // FIXME: remove this \\n hack for ripgrep
     return [items[0], items[1].replace(/\\n$/, "")] as ParsedTSVLine;
-}
+};
 
 if (import.meta.vitest) {
-    const { it, assert } = import.meta.vitest
-    it('parseTSVLine', () => {
+    const { it, assert } = import.meta.vitest;
+    it("parseTSVLine", () => {
         assert.deepStrictEqual(parseTSVLine("./test/js.pdf"), ["./test/js.pdf", ""]);
         assert.deepStrictEqual(parseTSVLine("./test/js.pdf\t"), ["./test/js.pdf", ""]);
         assert.deepStrictEqual(parseTSVLine("\t"), null);
         assert.deepStrictEqual(parseTSVLine("test.md\ttest\\ttest\\n"), ["test.md", "test\\ttest"]);
         assert.deepStrictEqual(parseTSVLine(""), null);
-    })
+    });
 }

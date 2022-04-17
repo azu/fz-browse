@@ -12,9 +12,7 @@ import { Action } from "history";
 
 const useCustomSearchParams = () => {
     const [search, setSearch] = useSearchParams();
-    const searchAsObject = useMemo(() => Object.fromEntries(
-        new URLSearchParams(search)
-    ), [search]);
+    const searchAsObject = useMemo(() => Object.fromEntries(new URLSearchParams(search)), [search]);
     return [searchAsObject, setSearch] as const;
 };
 export type AppProps = {
@@ -22,29 +20,29 @@ export type AppProps = {
     initialQuery?: string;
     csrfToken: string;
     displayItemLimit: number;
-}
+};
 export const Main: VFC<AppProps> = (props) => {
     const [searchAsObject, setSearchParams] = useCustomSearchParams();
-    const [input, setInput] = useState<string>(searchAsObject.q ?? "")
+    const [input, setInput] = useState<string>(searchAsObject.q ?? "");
     const highlightKeyword = useMemo(() => {
         return input.split(/[|\^\[\]().+*$]/);
     }, [input]);
     const [isPending, startTransition] = useTransition();
-    const [tsvList, setTsvList] = useSessionStorage<ParsedTSVLine[]>("fz-browser-session-results", [])
+    const [tsvList, setTsvList] = useSessionStorage<ParsedTSVLine[]>("fz-browser-session-results", []);
     const initialUpdate = useRef<boolean>(true);
-    const navigationType = useNavigationType()
+    const navigationType = useNavigationType();
     useEffect(() => {
         // for preserve scroll
         if (initialUpdate.current && navigationType === "POP") {
             return;
         }
         setTsvList([]);
-    }, [input, navigationType])
+    }, [input, navigationType]);
     useEffect(() => {
         initialUpdate.current = false;
         return () => {
             initialUpdate.current = true;
-        }
+        };
     }, []);
     const onInputChange: ChangeEventHandler<HTMLInputElement> = (event) => {
         const nextQuery = event.target.value;
@@ -53,100 +51,119 @@ export const Main: VFC<AppProps> = (props) => {
             ...searchAsObject,
             q: nextQuery
         });
-    }
+    };
     // stream
     useEffect(() => {
         // for preserve scroll
         if (initialUpdate.current && navigationType === Action.Pop) {
-            return
+            return;
         }
-        const controller = new AbortController()
-        const signal = controller.signal
-        let textBuffer = '';
+        const controller = new AbortController();
+        const signal = controller.signal;
+        let textBuffer = "";
         const push = (tsv: null | ParsedTSVLine) => {
             if (!tsv) {
                 return;
             }
             startTransition(() => {
-                setTsvList(texts => texts.concat([tsv]));
-            })
-        }
+                setTsvList((texts) => texts.concat([tsv]));
+            });
+        };
         const decoder = new TextDecoder();
         fetch(`/api/stream?input=${encodeURIComponent(input)}`, {
             headers: {
-                'CSRF-Token': props.csrfToken
-            }, signal
-        }).then((res) => {
-            // Verify that we have some sort of 2xx response that we can use
-            if (!res.ok) {
-                throw res;
-            }
-            if (!res.body) {
-                throw new Error("No body");
-            }
-            return res.body.getReader();
-        }).then(reader => {
-            function readChunk({ done, value }: ReadableStreamDefaultReadResult<any>) {
-                if (done) {
-                    push(parseTSVLine(textBuffer))
-                    return;
-                }
-                textBuffer += decoder.decode(value);
-                const lines = textBuffer.split('\n');
-                for (const line of lines.slice(0, -1)) {
-                    push(parseTSVLine(line));
-                }
-                textBuffer = lines.slice(-1)[0];
-                // next
-                reader.read().then(readChunk).catch(() => {
-                    // skip
-                })
-            }
-
-            reader.read().then(readChunk).catch(() => {
-                // skip
-            })
-        }).catch(() => {
-            textBuffer = "";
-            startTransition(() => {
-                setTsvList([])
-            })
+                "CSRF-Token": props.csrfToken
+            },
+            signal
         })
+            .then((res) => {
+                // Verify that we have some sort of 2xx response that we can use
+                if (!res.ok) {
+                    throw res;
+                }
+                if (!res.body) {
+                    throw new Error("No body");
+                }
+                return res.body.getReader();
+            })
+            .then((reader) => {
+                function readChunk({ done, value }: ReadableStreamDefaultReadResult<any>) {
+                    if (done) {
+                        push(parseTSVLine(textBuffer));
+                        return;
+                    }
+                    textBuffer += decoder.decode(value);
+                    const lines = textBuffer.split("\n");
+                    for (const line of lines.slice(0, -1)) {
+                        push(parseTSVLine(line));
+                    }
+                    textBuffer = lines.slice(-1)[0];
+                    // next
+                    reader
+                        .read()
+                        .then(readChunk)
+                        .catch(() => {
+                            // skip
+                        });
+                }
+
+                reader
+                    .read()
+                    .then(readChunk)
+                    .catch(() => {
+                        // skip
+                    });
+            })
+            .catch(() => {
+                textBuffer = "";
+                startTransition(() => {
+                    setTsvList([]);
+                });
+            });
         return () => {
             startTransition(() => {
-                setTsvList([])
-            })
+                setTsvList([]);
+            });
             controller.abort();
-        }
-    }, [input, navigationType])
+        };
+    }, [input, navigationType]);
     return (
-        <div style={{
-            maxWidth: "1024px",
-            margin: "auto"
-        }}>
-            <div style={{
-                display: "flex",
-                alignContent: "center",
-                alignItems: "center",
-                position: "sticky",
-                top: 0,
-                padding: "12px 0",
-                background: "var(--nc-bg-1)",
-                borderBottom: "solid 1px var(--nc-bg-2)"
-            }}>
-                <input type={"text"}
-                       value={input}
-                       onChange={onInputChange}
-                       autoFocus={true}
-                       style={{ flex: 1, borderRadius: "10px", padding: "8px" }}/>
-
+        <div
+            style={{
+                maxWidth: "1024px",
+                margin: "auto"
+            }}
+        >
+            <div
+                style={{
+                    display: "flex",
+                    alignContent: "center",
+                    alignItems: "center",
+                    position: "sticky",
+                    top: 0,
+                    padding: "12px 0",
+                    background: "var(--nc-bg-1)",
+                    borderBottom: "solid 1px var(--nc-bg-2)"
+                }}
+            >
+                <input
+                    type={"text"}
+                    value={input}
+                    onChange={onInputChange}
+                    autoFocus={true}
+                    style={{ flex: 1, borderRadius: "10px", padding: "8px" }}
+                />
             </div>
             <div>
-                <p style={{
-                    margin: 0,
-                    padding: 0,
-                    textAlign: "right"
-                }}>Hit: {Math.min(tsvList.length, props.displayItemLimit)}/{tsvList.length}</p>
+                <p
+                    style={{
+                        margin: 0,
+                        padding: 0,
+                        textAlign: "right"
+                    }}
+                >
+                    Hit: {Math.min(tsvList.length, props.displayItemLimit)}/{tsvList.length}
+                </p>
                 {tsvList.slice(0, props.displayItemLimit).map((tsv, index) => {
                     const filePath = tsv[0];
                     const content = tsv[1];
@@ -155,71 +172,80 @@ export const Main: VFC<AppProps> = (props) => {
                     }
                     const fileUrl = encodeURIComponent(location.origin + "/file/" + encodeURIComponent(filePath));
                     if (!content) {
-                        return <h2 key={index}>
-                            <Link to={{
-                                pathname: "/preview",
-                                search: new URLSearchParams([
-                                    ["targetFilePath", filePath],
-                                    ["targetUrl", fileUrl],
-                                    ["input", input]
-                                ]).toString()
-                            }}>{filePath}</Link>
-                        </h2>
+                        return (
+                            <h2 key={index}>
+                                <Link
+                                    to={{
+                                        pathname: "/preview",
+                                        search: new URLSearchParams([
+                                            ["targetFilePath", filePath],
+                                            ["targetUrl", fileUrl],
+                                            ["input", input]
+                                        ]).toString()
+                                    }}
+                                >
+                                    {filePath}
+                                </Link>
+                            </h2>
+                        );
                     } else {
                         // content
-                        return <p key={index}>
-                            <Highlighter
-                                highlightClassName="HighlightKeyWord"
-                                searchWords={highlightKeyword}
-                                autoEscape={true}
-                                textToHighlight={content}
-                            />
-                        </p>
+                        return (
+                            <p key={index}>
+                                <Highlighter
+                                    highlightClassName="HighlightKeyWord"
+                                    searchWords={highlightKeyword}
+                                    autoEscape={true}
+                                    textToHighlight={content}
+                                />
+                            </p>
+                        );
                     }
                 })}
             </div>
         </div>
-    )
-}
+    );
+};
 
-
-const PreviewRoute = (props: { input: string; targetUrl: string; targetFilePath: string; } & AppProps) => {
+const PreviewRoute = (props: { input: string; targetUrl: string; targetFilePath: string } & AppProps) => {
     if (props.targetUrl.endsWith(".pdf")) {
         return <PdfPreview {...props} />;
     } else if (props.targetUrl.endsWith(".epub")) {
-        return <EpubPreview {...props} />
+        return <EpubPreview {...props} />;
     }
-    return <DefaultPreview {...props} />
-}
+    return <DefaultPreview {...props} />;
+};
 export const Preview = (appProps: AppProps) => {
     const [searchAsObject] = useCustomSearchParams();
     const input = searchAsObject.input;
     const targetUrl = searchAsObject.targetUrl;
     const targetFilePath = searchAsObject.targetFilePath;
     if (!input) {
-        throw new Error("require ?input")
+        throw new Error("require ?input");
     }
     if (!targetUrl) {
-        throw new Error("require ?targetUrl")
+        throw new Error("require ?targetUrl");
     }
     if (!targetFilePath) {
-        throw new Error("require ?targetFilePath")
+        throw new Error("require ?targetFilePath");
     }
-    return <PreviewRoute {...appProps} input={input} targetUrl={targetUrl} targetFilePath={targetFilePath}/>;
-}
+    return <PreviewRoute {...appProps} input={input} targetUrl={targetUrl} targetFilePath={targetFilePath} />;
+};
 export const App: FC<AppProps> = (props) => {
-    return <Routes>
-        <Route index element={<Main {...props}/>}/>
-        <Route path={"/preview"} element={<Preview {...props}/>}/>
-    </Routes>
-}
+    return (
+        <Routes>
+            <Route index element={<Main {...props} />} />
+            <Route path={"/preview"} element={<Preview {...props} />} />
+        </Routes>
+    );
+};
 // preserve scroll
-if (typeof window !== "undefined" && 'scrollRestoration' in window.history) {
-    window.history.scrollRestoration = 'manual'
-    window.addEventListener('beforeunload', () => {
-        window.history.scrollRestoration = 'auto'
-    })
-    window.addEventListener('load', () => {
-        window.history.scrollRestoration = 'manual'
-    })
+if (typeof window !== "undefined" && "scrollRestoration" in window.history) {
+    window.history.scrollRestoration = "manual";
+    window.addEventListener("beforeunload", () => {
+        window.history.scrollRestoration = "auto";
+    });
+    window.addEventListener("load", () => {
+        window.history.scrollRestoration = "manual";
+    });
 }

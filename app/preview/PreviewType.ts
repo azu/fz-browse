@@ -4,4 +4,4 @@ export type PreviewProps = {
     targetUrl: string;
     targetFilePath: string;
     csrfToken: string;
-}
+};

@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 // https://github.com/streamich/react-use/blob/master/src/useSessionStorage.ts
 export const useSessionStorage = <T>(
     key: string,
@@ -6,19 +6,18 @@ export const useSessionStorage = <T>(
     raw?: boolean
 ): [T, Dispatch<SetStateAction<T>>] => {
     if (typeof window === "undefined") {
-        return [initialValue as T, () => {
-        }];
+        return [initialValue as T, () => {}];
     }
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const [state, setState] = useState<T>(() => {
         try {
             const sessionStorageValue = sessionStorage.getItem(key);
-            if (typeof sessionStorageValue !== 'string') {
+            if (typeof sessionStorageValue !== "string") {
                 sessionStorage.setItem(key, raw ? String(initialValue) : JSON.stringify(initialValue));
                 return initialValue;
             } else {
-                return raw ? sessionStorageValue : JSON.parse(sessionStorageValue || 'null');
+                return raw ? sessionStorageValue : JSON.parse(sessionStorageValue || "null");
             }
         } catch {
             // If user is in private mode or has storage restriction
