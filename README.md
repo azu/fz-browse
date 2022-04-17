@@ -55,7 +55,7 @@ If you want to display content of the file in search result, `--run` command sho
 
 It will be converted to following structure on view.
 
-```markdown
+```html
 <h2><a href="/preview/?target=/path/to/fileA">/path/to/fileA</a></h2>
 
 <p>Content of the file A1</p>
