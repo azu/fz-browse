@@ -27,7 +27,7 @@ export const Main: VFC<AppProps> = (props) => {
     const [searchAsObject, setSearchParams] = useCustomSearchParams();
     const [input, setInput] = useState<string>(searchAsObject.q ?? "")
     const highlightKeyword = useMemo(() => {
-        return input.split(/[\^\[\]().+*$]/);
+        return input.split(/[|\^\[\]().+*$]/);
     }, [input]);
     const [isPending, startTransition] = useTransition();
     const [tsvList, setTsvList] = useSessionStorage<ParsedTSVLine[]>("fz-browser-session-results", [])

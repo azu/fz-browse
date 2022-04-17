@@ -58,7 +58,7 @@ export const DefaultPreview: FC<PreviewProps> = (props) => {
         }
     }, [props]);
     const highlightKeyword = useMemo(() => {
-        return props.input.split(/[\^\[\]().+*$]/);
+        return props.input.split(/[|^\[\]().+*$]/)
     }, [props.input]);
     const actualFilePath = useMemo(() => {
         return props.cwd + props.targetFilePath
