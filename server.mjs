@@ -89,6 +89,9 @@ export async function createServer({
         if (!input) {
             return res.end();
         }
+        if (!preview) {
+            return res.end();
+        }
         const runCommand = preview.replace("{input}", `"${input}"`).replace("{target}", `"${target}"`);
         console.log({ input, target, runCommand })
         // const x = []

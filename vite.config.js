@@ -6,6 +6,9 @@ import { defineConfig } from "vitest/config";
  */
 module.exports = defineConfig({
     plugins: [react()],
+    build: {
+        minify: false
+    },
     test: {
         includeSource: ["{lib,app}/**/*.{js,ts}"]
     }

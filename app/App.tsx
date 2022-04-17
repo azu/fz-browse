@@ -9,6 +9,7 @@ import { EpubPreview } from "./preview/EpubPreview";
 import { DefaultPreview } from "./preview/DefaultPreview";
 import { useSessionStorage } from "./hooks/useSessionStorage";
 import { Action } from "history";
+import { ImagePreview } from "./preview/ImagePreview";
 
 const useCustomSearchParams = () => {
     const [search, setSearch] = useSearchParams();
@@ -21,23 +22,42 @@ export type AppProps = {
     csrfToken: string;
     displayItemLimit: number;
 };
+const IMAGE_PATTERN = /\.(png|jpe|jpeg|webp|gif)$/;
+const LinkContent = (props: { children: string }) => {
+    if (IMAGE_PATTERN.test(props.children)) {
+        const imgUrl = location.origin + "/file/" + encodeURIComponent(props.children);
+        return <img src={imgUrl} loading={"lazy"} alt={props.children} />;
+    }
+    return <>{props.children}</>;
+};
 export const Main: VFC<AppProps> = (props) => {
     const [searchAsObject, setSearchParams] = useCustomSearchParams();
     const [input, setInput] = useState<string>(searchAsObject.q ?? "");
     const highlightKeyword = useMemo(() => {
-        return input.split(/[|\^\[\]().+*$]/);
+        return input.split(/[|^\[\]().+*$]/);
     }, [input]);
     const [isPending, startTransition] = useTransition();
     const [tsvList, setTsvList] = useSessionStorage<ParsedTSVLine[]>("fz-browser-session-results", []);
+    const isReload = useMemo(() => {
+        if (typeof window === "undefined") {
+            return false;
+        }
+        return (
+            (window.performance.navigation && window.performance.navigation.type === 1) ||
+            window.performance
+                .getEntriesByType("navigation")
+                .some((nav) => (nav as PerformanceNavigationTiming).type === "reload")
+        );
+    }, []);
     const initialUpdate = useRef<boolean>(true);
     const navigationType = useNavigationType();
     useEffect(() => {
         // for preserve scroll
-        if (initialUpdate.current && navigationType === "POP") {
+        if (!isReload && initialUpdate.current && navigationType === "POP") {
             return;
         }
         setTsvList([]);
-    }, [input, navigationType]);
+    }, [input, navigationType, isReload]);
     useEffect(() => {
         initialUpdate.current = false;
         return () => {
@@ -107,6 +127,9 @@ export const Main: VFC<AppProps> = (props) => {
                         });
                 }
 
+                startTransition(() => {
+                    setTsvList([]);
+                });
                 reader
                     .read()
                     .then(readChunk)
@@ -121,9 +144,7 @@ export const Main: VFC<AppProps> = (props) => {
                 });
             });
         return () => {
-            startTransition(() => {
-                setTsvList([]);
-            });
+            setTsvList([]);
             controller.abort();
         };
     }, [input, navigationType]);
@@ -184,7 +205,7 @@ export const Main: VFC<AppProps> = (props) => {
                                         ]).toString()
                                     }}
                                 >
-                                    {filePath}
+                                    <LinkContent>{filePath}</LinkContent>
                                 </Link>
                             </h2>
                         );
@@ -214,6 +235,8 @@ const PreviewRoute = (props: { input: string; targetUrl: string; targetFilePath:
         return <PdfPreview {...props} />;
     } else if (props.targetUrl.endsWith(".epub")) {
         return <EpubPreview {...props} />;
+    } else if (IMAGE_PATTERN.test(props.targetFilePath)) {
+        return <ImagePreview {...props} />;
     }
     return <DefaultPreview {...props} />;
 };

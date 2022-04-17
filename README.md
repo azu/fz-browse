@@ -147,10 +147,20 @@ end | [.data.path.text, .data.lines.text] | @tsv'
 - Requirements:
   - [ripgrep](https://github.com/BurntSushi/ripgrep)
   - [jq](https://stedolan.github.io/jq/)
-  - Google Chrome/Firefox/MSEdge
 
 ```shell
 fz-browse --run $'rg --ignore-case {input} --json | jq \'if .type == "begin" or .type == "match" then . else empty end | [.data.path.text, .data.lines.text] | @tsv\' -r' --preview "rg --context 5 {input} {target}" --open --browser "google chrome"
+```
+
+### Search Images by Date
+
+Search Images using exiftool.
+
+- Requirements:
+  - [ExifTool](https://exiftool.org/)
+
+```
+fz-browse --run $'find -E . -iregex ".*\.(jpg|gif|png|jpeg)$" -print0 | xargs -0 exiftool -q -m -p \'$Directory/$Filename  $DateTimeOriginal  $Comment\' | grep {input} | awk \'{print $1}\'' --preview "echo {target}"
 ```
 
 ## Develop
