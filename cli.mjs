@@ -20,7 +20,7 @@ const cli = meow(
       --cwd                        [String:Path] Current working directory
       --query                      [String] Default search query
       --open                       [Boolean] If it is set, open browser automatically
-      --browser                    [String] for opening browser name: chrome, firefox, edge
+      --browser                    [String] for opening browser name: "google chrome", "firefox", "microsoft edge"
       --displayItemLimit           [Number] Limit count for display search results
 
     Examples

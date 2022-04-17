@@ -17,7 +17,7 @@ fzf-like tool but view on browser.
       --cwd                        [String:Path] Current working directory
       --query                      [String] Default search query
       --open                       [Boolean] If it is set, open browser automatically
-      --browser                    [String] for opening browser name: chrome, firefox, edge
+      --browser                    [String] for opening browser name: "google chrome", "firefox", "microsoft edge"
       --displayItemLimit           [Number] Limit count for display search results
 
     Examples
@@ -135,6 +135,16 @@ end | [.data.path.text, .data.lines.text] | @tsv'
 ```
 
 </details>
+
+### Open browser automatically
+
+- Requirements:
+  - [ripgrep](https://github.com/BurntSushi/ripgrep)
+  - [jq](https://stedolan.github.io/jq/)
+
+```shell
+fz-browse --run $'rg --ignore-case {input} --json | jq \'if .type == "begin" or .type == "match" then . else empty end | [.data.path.text, .data.lines.text] | @tsv\' -r' --preview "rg --context 5 {input} {target}" --open --browser "google chrome"
+```
 
 ## Develop
 
