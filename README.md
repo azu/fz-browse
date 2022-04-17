@@ -103,6 +103,8 @@ It will be converted
 
 ### Search text contents
 
+Show [ripgrep](https://github.com/BurntSushi/ripgrep) search results 
+
 - Requirements:
   - [ripgrep](https://github.com/BurntSushi/ripgrep)
   - [jq](https://stedolan.github.io/jq/)
@@ -112,6 +114,8 @@ fz-browse --run $'rg --ignore-case {input} --json | jq \'if .type == "begin" or 
 ```
 
 ### Search PDF and epub books
+
+Show [ripgrep-all](https://github.com/phiresky/ripgrep-all) search results
 
 - Requirements:
   - [ripgrep-all](https://github.com/phiresky/ripgrep-all)
@@ -137,6 +141,8 @@ end | [.data.path.text, .data.lines.text] | @tsv'
 </details>
 
 ### Open browser automatically
+
+`--open` and `--browser <browsername>` allow you to open a browser.
 
 - Requirements:
   - [ripgrep](https://github.com/BurntSushi/ripgrep)
