@@ -1,6 +1,6 @@
 # fz-browse
 
-fzf-like tool but view on browser.
+fzf-like tool but view search results on browser.
 
 https://user-images.githubusercontent.com/19714/163715237-e16cfafe-5e11-4d20-9398-1fbb5e845f7e.mp4
 
