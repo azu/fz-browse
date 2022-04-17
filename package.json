@@ -1,6 +1,6 @@
 {
   "name": "fz-browse",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "bin": "./cli.mjs",
   "files": [
     "cli.mjs",
