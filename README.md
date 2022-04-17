@@ -26,12 +26,11 @@ fzf-like tool but view on browser.
       # Search PDF/epub books
       fz-browse --run $'rga --ignore-case {input} --json | jq \'if .type == "begin" or .type == "match" then . else empty end | [.data.path.text, .data.lines.text] | @tsv\' -r' --preview "rga --context 5 {input} {target}" --cwd "/Path/To/Your/BookDir"
 
-- `--run`: fz-browse execute the `run` command when input search keywords
-- `--preview`: fz-browse execute the `preview` command when click the search result
-
-## Command Format
+## Command Output Format
 
 ### Run command output format
+
+- `--run`: fz-browse execute the `run` command when input search keywords
 
 `--run` command should output following file path by line.
 
@@ -78,6 +77,8 @@ It will be converted to following structure on view.
 ```
 
 ### Preview command output format
+
+- `--preview`: fz-browse execute the `preview` command when click the search result
 
 `--preview` command should output following content by line.
 
