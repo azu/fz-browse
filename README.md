@@ -6,6 +6,7 @@ fz-browse is [fzf](https://github.com/junegunn/fzf)-like tool but view search re
 
 https://user-images.githubusercontent.com/19714/163715237-e16cfafe-5e11-4d20-9398-1fbb5e845f7e.mp4
 
+
 ## Installation
 
     npm install --global fz-browse
@@ -100,8 +101,9 @@ It will be converted to following structure on view.
 <p>content C</p>
 ```
 
+## Architure
 
-It will be converted
+![architure.png](./docs/architure.png)
 
 ## Recipes
 
