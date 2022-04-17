@@ -29,11 +29,11 @@ fzf-like tool but view on browser.
 - `--run`: fz-browse execute the `run` command when input search keywords
 - `--preview`: fz-browse execute the `preview` command when click the search result
 
-## Accept
+## Command Format
 
-Format
+### Run command output format
 
-Support simple file path list by line.
+`--run` command should output following file path by line.
 
 ```
 /path/to/file
@@ -41,7 +41,8 @@ Support simple file path list by line.
 /path/to/file
 ```
 
-Support following TSV list by line.
+Also, support following TSV list by line.
+If you want to display content of the file in search result, `--run` command should output `<filepath>\t<content>` pattern.
 
 ```tsv
 /path/to/fileA
@@ -55,13 +56,15 @@ Support following TSV list by line.
 It will be converted to following structure on view.
 
 ```markdown
-# /path/to/file
+<h2><a href="/preview/?target=/path/to/fileA">/path/to/fileA</a></h2>
 
-Content of the file A1 Content of the file A2 Content of the file A3
+<p>Content of the file A1</p>
+<p>Content of the file A2</p>
+<p>Content of the file A3</p>
 
-# /path/to/fileB
+<h2><a href="/preview/?target=/path/to/fileB">/path/to/fileB</a></h2>
 
-Content of the file B1
+<p>Content of the file B1</p>
 ```
 
 :memo: Empty TSV line will be ignored.
@@ -73,6 +76,27 @@ Content of the file B1
 /path/to/file\tContent of the file A3
 \t # This line will be ignored
 ```
+
+### Preview command output format
+
+`--preview` command should output following content by line.
+
+```
+content A
+content B
+content C
+```
+
+It will be converted to following structure on view.
+
+```html
+<p>content A</p>
+<p>content B</p>
+<p>content C</p>
+```
+
+
+It will be converted
 
 ## Recipes
 
