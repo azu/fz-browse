@@ -1,6 +1,5 @@
 {
   "name": "fz-browse",
-  "private": true,
   "version": "0.0.0",
   "scripts": {
     "dev": "node server.mjs",
