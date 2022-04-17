@@ -1,9 +1,10 @@
 # fz-browse
 
-fzf-like tool but view search results on browser.
+fz-browse is a general-purpose command-line fuzzy finder.
+
+fz-browse is [fzf](https://github.com/junegunn/fzf)-like tool but view search results on browser.
 
 https://user-images.githubusercontent.com/19714/163715237-e16cfafe-5e11-4d20-9398-1fbb5e845f7e.mp4
-
 
 ## Installation
 
