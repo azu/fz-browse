@@ -1,18 +1,9 @@
-import {
-    useCallback,
-    useEffect,
-    useMemo,
-    useState,
-    VFC,
-    startTransition,
-    useDeferredValue,
-    useTransition, ReactNode, FC, ChangeEventHandler
-} from "react";
+import { ChangeEventHandler, FC, useEffect, useMemo, useState, useTransition, VFC } from "react";
 import { ParsedTSVLine, parseTSVLine } from "./lib/tsv-parse";
 
 import Highlighter from "react-highlight-words";
-import { BrowserRouter, Link, useNavigate, useRoutes, useSearchParams } from "react-router-dom";
-import { Route, Routes, useLocation } from "react-router";
+import { Link, useSearchParams } from "react-router-dom";
+import { Route, Routes } from "react-router";
 import { PdfPreview } from "./preview/PdfPreview";
 import { EpubPreview } from "./preview/EpubPreview";
 import { DefaultPreview } from "./preview/DefaultPreview";
@@ -50,10 +41,8 @@ export const Main: VFC<AppProps> = (props) => {
     }, [input]);
     const [isPending, startTransition] = useTransition();
     const [tsvList, setTsvList] = useState<ParsedTSVLine[]>([])
-    const [preview, setPreview] = useState<string[]>([])
     useEffect(() => {
         setTsvList([])
-        setPreview([]);
     }, [input])
     const onInputChange: ChangeEventHandler<HTMLInputElement> = (event) => {
         const nextQuery = event.target.value;
@@ -63,60 +52,6 @@ export const Main: VFC<AppProps> = (props) => {
             q: nextQuery
         });
     }
-    const onPreview = useCallback(async (item: string) => {
-        let textBuffer = '';
-        const push = (line?: string) => {
-            if (!line) {
-                return;
-            }
-            setPreview(texts => texts.concat(line));
-        }
-        const controller = new AbortController()
-        const signal = controller.signal
-        const decoder = new TextDecoder();
-        fetch(`/preview?input=${encodeURIComponent(input)}&result=${encodeURIComponent(item)}`, {
-            headers: {
-                'CSRF-Token': props.csrfToken
-            },
-            signal
-        }).then((res) => {
-            // Verify that we have some sort of 2xx response that we can use
-            if (!res.ok) {
-                throw res;
-            }
-            if (!res.body) {
-                throw new Error("No body");
-            }
-            return res.body.getReader();
-        }).then(reader => {
-            function readChunk({ done, value }: ReadableStreamDefaultReadResult<any>) {
-                if (done) {
-                    push(textBuffer)
-                    return;
-                }
-                textBuffer += decoder.decode(value);
-                const lines = textBuffer.split('\n');
-                for (const line of lines.slice(0, -1)) {
-                    push(line);
-                }
-                textBuffer = lines.slice(-1)[0];
-                // next
-                reader.read().then(readChunk).catch(() => {
-                    // skip
-                })
-            }
-
-            setTsvList([]);
-            setPreview([]);
-            reader.read().then(readChunk).catch(() => {
-                // skip
-            })
-        });
-        return () => {
-            controller.abort();
-            setTsvList([]);
-        }
-    }, [input]);
     // stream
     useEffect(() => {
         const controller = new AbortController()
@@ -131,7 +66,7 @@ export const Main: VFC<AppProps> = (props) => {
             })
         }
         const decoder = new TextDecoder();
-        fetch(`/stream?input=${encodeURIComponent(input)}`, {
+        fetch(`/api/stream?input=${encodeURIComponent(input)}`, {
             headers: {
                 'CSRF-Token': props.csrfToken
             }, signal
@@ -179,7 +114,10 @@ export const Main: VFC<AppProps> = (props) => {
         }
     }, [input])
     return (
-        <div>
+        <div style={{
+            maxWidth: "1024px",
+            margin: "auto"
+        }}>
             <div style={{
                 display: "flex",
                 alignContent: "center",
@@ -210,7 +148,8 @@ export const Main: VFC<AppProps> = (props) => {
                                 <Link to={{
                                     pathname: "/preview",
                                     search: new URLSearchParams([
-                                        ["target", fileUrl],
+                                        ["targetFilePath", filePath],
+                                        ["targetUrl", fileUrl],
                                         ["input", input]
                                     ]).toString()
                                 }}>{filePath}</Link>
@@ -239,29 +178,33 @@ export const Main: VFC<AppProps> = (props) => {
 }
 
 
-const PreviewRoute = (props: { input: string; target: string; }) => {
-    if (props.target.endsWith(".pdf")) {
+const PreviewRoute = (props: { input: string; targetUrl: string; targetFilePath: string; } & AppProps) => {
+    if (props.targetUrl.endsWith(".pdf")) {
         return <PdfPreview {...props} />;
-    } else if (props.target.endsWith(".epub")) {
+    } else if (props.targetUrl.endsWith(".epub")) {
         return <EpubPreview {...props} />
     }
     return <DefaultPreview {...props} />
 }
-export const Preview = () => {
+export const Preview = (appProps: AppProps) => {
     const [searchAsObject] = useCustomSearchParams();
     const input = searchAsObject.input;
-    const target = searchAsObject.target;
+    const targetUrl = searchAsObject.targetUrl;
+    const targetFilePath = searchAsObject.targetFilePath;
     if (!input) {
         throw new Error("require ?input")
     }
-    if (!target) {
-        throw new Error("require ?target")
+    if (!targetUrl) {
+        throw new Error("require ?targetUrl")
     }
-    return <PreviewRoute input={input} target={target}/>;
+    if (!targetFilePath) {
+        throw new Error("require ?targetFilePath")
+    }
+    return <PreviewRoute {...appProps} input={input} targetUrl={targetUrl} targetFilePath={targetFilePath}/>;
 }
 export const App: FC<AppProps> = (props) => {
     return <Routes>
         <Route index element={<Main {...props}/>}/>
-        <Route path={"/preview"} element={<Preview/>}/>
+        <Route path={"/preview"} element={<Preview {...props}/>}/>
     </Routes>
 }

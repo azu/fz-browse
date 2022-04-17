@@ -61285,10 +61285,10 @@ function handleBreak(node) {
     }
 
     if (node.startNew) {
-      node[_xfa_object.$extra].target = target || currentPageArea;
+      node[_xfa_object.$extra].targetUrl = target || currentPageArea;
       return true;
     } else if (target && target !== currentPageArea) {
-      node[_xfa_object.$extra].target = target;
+      node[_xfa_object.$extra].targetUrl = target;
       return true;
     }
 
@@ -61326,7 +61326,7 @@ function handleBreak(node) {
     return false;
   }
 
-  node[_xfa_object.$extra].target = nextPageArea;
+  node[_xfa_object.$extra].targetUrl = nextPageArea;
   node[_xfa_object.$extra].index = index;
   return true;
 }
@@ -61839,7 +61839,7 @@ class BreakAfter extends _xfa_object.XFAObject {
       defaultValue: 0,
       validate: x => x === 1
     });
-    this.target = attributes.target || "";
+    this.targetUrl = attributes.target || "";
     this.targetType = (0, _utils.getStringOption)(attributes.targetType, ["auto", "contentArea", "pageArea"]);
     this.trailer = attributes.trailer || "";
     this.use = attributes.use || "";
@@ -61859,7 +61859,7 @@ class BreakBefore extends _xfa_object.XFAObject {
       defaultValue: 0,
       validate: x => x === 1
     });
-    this.target = attributes.target || "";
+    this.targetUrl = attributes.target || "";
     this.targetType = (0, _utils.getStringOption)(attributes.targetType, ["auto", "contentArea", "pageArea"]);
     this.trailer = attributes.trailer || "";
     this.use = attributes.use || "";
@@ -62842,7 +62842,7 @@ class EncryptData extends _xfa_object.XFAObject {
     super(TEMPLATE_NS_ID, "encryptData", true);
     this.id = attributes.id || "";
     this.operation = (0, _utils.getStringOption)(attributes.operation, ["encrypt", "decrypt"]);
-    this.target = attributes.target || "";
+    this.targetUrl = attributes.target || "";
     this.use = attributes.use || "";
     this.usehref = attributes.usehref || "";
     this.filter = null;
@@ -64499,7 +64499,7 @@ class Overflow extends _xfa_object.XFAObject {
     super(TEMPLATE_NS_ID, "overflow");
     this.id = attributes.id || "";
     this.leader = attributes.leader || "";
-    this.target = attributes.target || "";
+    this.targetUrl = attributes.target || "";
     this.trailer = attributes.trailer || "";
     this.use = attributes.use || "";
     this.usehref = attributes.usehref || "";
@@ -65167,7 +65167,7 @@ class SetProperty extends _xfa_object.XFAObject {
     super(TEMPLATE_NS_ID, "setProperty");
     this.connection = attributes.connection || "";
     this.ref = attributes.ref || "";
-    this.target = attributes.target || "";
+    this.targetUrl = attributes.target || "";
   }
 
 }
@@ -65180,7 +65180,7 @@ class SignData extends _xfa_object.XFAObject {
     this.id = attributes.id || "";
     this.operation = (0, _utils.getStringOption)(attributes.operation, ["sign", "clear", "verify"]);
     this.ref = attributes.ref || "";
-    this.target = attributes.target || "";
+    this.targetUrl = attributes.target || "";
     this.use = attributes.use || "";
     this.usehref = attributes.usehref || "";
     this.filter = null;
@@ -65738,7 +65738,7 @@ class Submit extends _xfa_object.XFAObject {
     });
     this.format = (0, _utils.getStringOption)(attributes.format, ["xdp", "formdata", "pdf", "urlencoded", "xfd", "xml"]);
     this.id = attributes.id || "";
-    this.target = attributes.target || "";
+    this.targetUrl = attributes.target || "";
     this.textEncoding = (0, _utils.getKeyword)({
       data: attributes.textEncoding ? attributes.textEncoding.toLowerCase() : "",
       defaultValue: "",
@@ -73747,7 +73747,7 @@ class PDFWorkerStreamRangeReader {
 /************************************************************************/
 /******/ 	// The module cache
 /******/ 	var __webpack_module_cache__ = {};
-/******/ 	
+/******/
 /******/ 	// The require function
 /******/ 	function __w_pdfjs_require__(moduleId) {
 /******/ 		// Check if module is in cache
@@ -73761,14 +73761,14 @@ class PDFWorkerStreamRangeReader {
 /******/ 			// no module.loaded needed
 /******/ 			exports: {}
 /******/ 		};
-/******/ 	
+/******/
 /******/ 		// Execute the module function
 /******/ 		__webpack_modules__[moduleId](module, module.exports, __w_pdfjs_require__);
-/******/ 	
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/ 	
+/******/
 /************************************************************************/
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
@@ -73781,12 +73781,12 @@ class PDFWorkerStreamRangeReader {
 /******/ 			}
 /******/ 		};
 /******/ 	})();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__w_pdfjs_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
 /******/ 	})();
-/******/ 	
+/******/
 /******/ 	/* webpack/runtime/make namespace object */
 /******/ 	(() => {
 /******/ 		// define __esModule on exports
@@ -73797,7 +73797,7 @@ class PDFWorkerStreamRangeReader {
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
 /******/ 	})();
-/******/ 	
+/******/
 /************************************************************************/
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.

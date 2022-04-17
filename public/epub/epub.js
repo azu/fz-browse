@@ -7705,8 +7705,8 @@ class themes_Themes {
   }
   /**
    * Register a theme by passing its css as string
-   * @param {string} name 
-   * @param {string} css 
+   * @param {string} name
+   * @param {string} css
    */
 
 
@@ -18522,14 +18522,14 @@ NodeList.prototype = {
 	 * The number of nodes in the list. The range of valid child node indices is 0 to length-1 inclusive.
 	 * @standard level1
 	 */
-	length:0, 
+	length:0,
 	/**
 	 * Returns the indexth item in the collection. If index is greater than or equal to the number of nodes in the list, this returns null.
 	 * @standard level1
-	 * @param index  unsigned long 
+	 * @param index  unsigned long
 	 *   Index into the collection.
 	 * @return Node
-	 * 	The node at the indexth position in the NodeList, or null if that is not a valid index. 
+	 * 	The node at the indexth position in the NodeList, or null if that is not a valid index.
 	 */
 	item: function(index) {
 		return this[index] || null;
@@ -18573,7 +18573,7 @@ _extends(LiveNodeList,NodeList);
  * but this is simply to allow convenient enumeration of the contents of a NamedNodeMap,
  * and does not imply that the DOM specifies an order to these Nodes.
  * NamedNodeMap objects in the DOM are live.
- * used for attributes or DocumentType entities 
+ * used for attributes or DocumentType entities
  */
 function NamedNodeMap() {
 };
@@ -18811,10 +18811,10 @@ Node.prototype = {
 	prefix : null,
 	localName : null,
 	// Modified in DOM Level 2:
-	insertBefore:function(newChild, refChild){//raises 
+	insertBefore:function(newChild, refChild){//raises
 		return _insertBefore(this,newChild,refChild);
 	},
-	replaceChild:function(newChild, oldChild){//raises 
+	replaceChild:function(newChild, oldChild){//raises
 		this.insertBefore(newChild,oldChild);
 		if(oldChild){
 			this.removeChild(oldChild);
@@ -18980,7 +18980,7 @@ function _onUpdateChild(doc,el,newChild){
 /**
  * attributes;
  * children;
- * 
+ *
  * writeable properties:
  * nodeValue,Attr:value,CharacterData:data
  * prefix
@@ -19505,7 +19505,7 @@ function needNamespaceDefine(node, isHTML, visibleNamespaces) {
 		return false;
 	}
 	
-	var i = visibleNamespaces.length 
+	var i = visibleNamespaces.length
 	while (i--) {
 		var ns = visibleNamespaces[i];
 		// get namespace prefix
@@ -19608,7 +19608,7 @@ function serializeToString(node,buf,isHTML,nodeFilter,visibleNamespaces){
 			serializeToString(attr,buf,isHTML,nodeFilter,visibleNamespaces);
 		}
 
-		// add namespace for current node		
+		// add namespace for current node
 		if (nodeName === prefixedNodeName && needNamespaceDefine(node, isHTML, visibleNamespaces)) {
 			var prefix = node.prefix||'';
 			var uri = node.namespaceURI;
@@ -20889,7 +20889,7 @@ var tagNamePattern = new RegExp('^'+nameStartChar.source+nameChar.source+'*(?:\:
 //S_TAG,	S_ATTR,	S_EQ,	S_ATTR_NOQUOT_VALUE
 //S_ATTR_SPACE,	S_ATTR_END,	S_TAG_SPACE, S_TAG_CLOSE
 var S_TAG = 0;//tag name offerring
-var S_ATTR = 1;//attr name offerring 
+var S_ATTR = 1;//attr name offerring
 var S_ATTR_SPACE=2;//attr name end and space offer
 var S_EQ = 3;//=space?
 var S_ATTR_NOQUOT_VALUE = 4;//attr value(no quot value only)
@@ -20913,7 +20913,7 @@ ParseError.prototype = new Error();
 ParseError.prototype.name = ParseError.name
 
 function XMLReader(){
-	
+
 }
 
 XMLReader.prototype = {
@@ -20943,7 +20943,7 @@ function parse(source,defaultNSMapCopy,entityMap,domBuilder,errorHandler){
 	function entityReplacer(a){
 		var k = a.slice(1,-1);
 		if(k in entityMap){
-			return entityMap[k]; 
+			return entityMap[k];
 		}else if(k.charAt(0) === '#'){
 			return fixedFromCharCode(parseInt(k.substr(1).replace('x','0x')))
 		}else{
@@ -21306,7 +21306,7 @@ function appendElement(el,domBuilder,currentNSMap){
 		}
 		//can not set prefix,because prefix !== ''
 		a.localName = localName ;
-		//prefix == null for no ns prefix attribute 
+		//prefix == null for no ns prefix attribute
 		if(nsPrefix !== false){//hack!!
 			if(localNSMap == null){
 				localNSMap = {}
@@ -21316,7 +21316,7 @@ function appendElement(el,domBuilder,currentNSMap){
 			}
 			currentNSMap[nsPrefix] = localNSMap[nsPrefix] = value;
 			a.uri = NAMESPACE.XMLNS
-			domBuilder.startPrefixMapping(nsPrefix, value) 
+			domBuilder.startPrefixMapping(nsPrefix, value)
 		}
 	}
 	var i = el.length;
@@ -21350,7 +21350,7 @@ function appendElement(el,domBuilder,currentNSMap){
 		domBuilder.endElement(ns,localName,tagName);
 		if(localNSMap){
 			for(prefix in localNSMap){
-				domBuilder.endPrefixMapping(prefix) 
+				domBuilder.endPrefixMapping(prefix)
 			}
 		}
 	}else{
@@ -21394,7 +21394,7 @@ function fixSelfClosed(source,elStartEnd,tagName,closeMap){
 		closeMap[tagName] =pos
 	}
 	return pos<elStartEnd;
-	//} 
+	//}
 }
 function _copy(source,target){
 	for(var n in source){target[n] = source[n]}
@@ -21422,11 +21422,11 @@ function parseDCC(source,start,domBuilder,errorHandler){//sure start with '<!'
 			var end = source.indexOf(']]>',start+9);
 			domBuilder.startCDATA();
 			domBuilder.characters(source,start+9,end-start-9);
-			domBuilder.endCDATA() 
+			domBuilder.endCDATA()
 			return end+3;
 		}
 		//<!DOCTYPE
-		//startDTD(java.lang.String name, java.lang.String publicId, java.lang.String systemId) 
+		//startDTD(java.lang.String name, java.lang.String publicId, java.lang.String systemId)
 		var matchs = split(source,start);
 		var len = matchs.length;
 		if(len>1 && /!doctype/i.test(matchs[0][0])){
@@ -21493,7 +21493,7 @@ ElementAttributes.prototype = {
 	getValue:function(i){return this[i].value}
 //	,getIndex:function(uri, localName)){
 //		if(localName){
-//			
+//
 //		}else{
 //			var qName = uri
 //		}
@@ -21604,12 +21604,12 @@ function proxyMouse(target, tracked) {
 
         try {
             // Try to get the contents if same domain
-            this.target = target.contentDocument;
+            this.targetUrl = target.contentDocument;
         } catch (err) {
-            this.target = target;
+            this.targetUrl = target;
         }
     } else {
-        this.target = target;
+        this.targetUrl = target;
     }
 
     var _arr = ['mouseup', 'mousedown', 'click', 'touchstart'];

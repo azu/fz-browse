@@ -61,7 +61,7 @@ export async function createServer({
         )
     }
     app.use("/public", serveStatic(path.join(__dirname, 'public')))
-    app.get('/stream', csrfProtection, async (req, res) => {
+    app.get('/api/stream', csrfProtection, async (req, res) => {
         const input = req.query.input;
         if (!input) {
             return res.end();
@@ -82,14 +82,14 @@ export async function createServer({
         });
         ret.stdout.pipe(res);
     });
-    app.get('/preview', csrfProtection, async (req, res) => {
+    app.get('/api/preview', csrfProtection, async (req, res) => {
         const input = req.query.input;
-        const result = req.query.result;
+        const target = req.query.target;
         if (!input) {
             return res.end();
         }
-        const runCommand = preview.replace("{input}", `"${input}"`).replace("{result}", `"${result}"`);
-        console.log({ input, result, runCommand })
+        const runCommand = preview.replace("{input}", `"${input}"`).replace("{target}", `"${target}"`);
+        console.log({ input, target, runCommand })
         // const x = []
         const ret = execa(runCommand, {
             cwd: cwd,
