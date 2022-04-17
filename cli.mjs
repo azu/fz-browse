@@ -12,15 +12,22 @@ const cli = meow(
     `
   
     Usage
-      $ node cli.mjs
+      $ fz-browse [option]
 
     Options
-      --run             [String] Run command
-      --preview         [String] Preview command
-      --cwd             [String:Path] Current working directory
+      --run                        [String] Run command
+      --preview                    [String] Preview command
+      --cwd                        [String:Path] Current working directory
+      --query                      [String] Default search query
+      --open                       [Boolean] If it is set, open browser automatically
+      --browser                    [String] for opening browser name: chrome, firefox, edge
+      --displayItemLimit           [Number] Limit count for display search results
 
     Examples
-      
+      # Search text contents
+      fz-browse --run $'rg --ignore-case {input} --json | jq \\'if .type == "begin" or .type == "match" then . else empty end | [.data.path.text, .data.lines.text] | @tsv\\' -r' --preview "rg --context 5 {input} {target}"
+      # Search PDF/epub books
+      fz-browse --run $'rga --ignore-case {input} --json | jq \\'if .type == "begin" or .type == "match" then . else empty end | [.data.path.text, .data.lines.text] | @tsv\\' -r' --preview "rga --context 5 {input} {target}" --cwd "/Path/To/Your/BookDir"
       `,
     {
         importMeta: import.meta,

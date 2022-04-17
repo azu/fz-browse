@@ -1,8 +1,37 @@
-# fz-browser
+# fz-browse
 
 fzf-like tool but view on browser.
 
-## Format
+## Installation
+
+    npm install --global fz-browse
+
+## Usage
+
+    Usage
+      $ fz-browse [option]
+
+    Options
+      --run                        [String] Run command
+      --preview                    [String] Preview command
+      --cwd                        [String:Path] Current working directory
+      --query                      [String] Default search query
+      --open                       [Boolean] If it is set, open browser automatically
+      --browser                    [String] for opening browser name: chrome, firefox, edge
+      --displayItemLimit           [Number] Limit count for display search results
+
+    Examples
+      # Search text contents
+      fz-browse --run $'rg --ignore-case {input} --json | jq \'if .type == "begin" or .type == "match" then . else empty end | [.data.path.text, .data.lines.text] | @tsv\' -r' --preview "rg --context 5 {input} {target}"
+      # Search PDF/epub books
+      fz-browse --run $'rga --ignore-case {input} --json | jq \'if .type == "begin" or .type == "match" then . else empty end | [.data.path.text, .data.lines.text] | @tsv\' -r' --preview "rga --context 5 {input} {target}" --cwd "/Path/To/Your/BookDir"
+
+- `--run`: fz-browse execute the `run` command when input search keywords
+- `--preview`: fz-browse execute the `preview` command when click the search result
+
+## Accept
+
+Format
 
 Support simple file path list by line.
 
