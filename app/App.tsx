@@ -38,26 +38,15 @@ export const Main: VFC<AppProps> = (props) => {
     }, [input]);
     const [isPending, startTransition] = useTransition();
     const [tsvList, setTsvList] = useSessionStorage<ParsedTSVLine[]>("fz-browser-session-results", []);
-    const isReload = useMemo(() => {
-        if (typeof window === "undefined") {
-            return false;
-        }
-        return (
-            (window.performance.navigation && window.performance.navigation.type === 1) ||
-            window.performance
-                .getEntriesByType("navigation")
-                .some((nav) => (nav as PerformanceNavigationTiming).type === "reload")
-        );
-    }, []);
     const initialUpdate = useRef<boolean>(true);
     const navigationType = useNavigationType();
     useEffect(() => {
         // for preserve scroll
-        if (!isReload && initialUpdate.current && navigationType === "POP") {
+        if (initialUpdate.current && navigationType === "POP") {
             return;
         }
         setTsvList([]);
-    }, [input, navigationType, isReload]);
+    }, [input, navigationType]);
     useEffect(() => {
         initialUpdate.current = false;
         return () => {
