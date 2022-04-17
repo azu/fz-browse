@@ -81,3 +81,17 @@ end | [.data.path.text, .data.lines.text] | @tsv'
 ```
 
 </details>
+
+## Develop
+
+  git clone https://github.com/azu/fz-browse
+  cd fz-browse
+  yarn install
+  # using vite server
+  NODE_ENV=develop PORT=3000 node ./cli.mjs ...
+
+## License
+
+MIT ©️ azu
+
+

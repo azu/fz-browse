@@ -61,7 +61,8 @@ const server = await createServer({
     run: cli.flags.run,
     query: cli.flags.query,
     preview: cli.flags.preview,
-    displayItemLimit: cli.flags.displayItemLimit
+    displayItemLimit: cli.flags.displayItemLimit,
+    isProd: process.env.NODE_ENV !== 'develop'
 });
 const PORT = process.env.PORT ?? 0;
 const listener = server.app.listen(PORT, async () => {

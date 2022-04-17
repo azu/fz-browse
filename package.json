@@ -1,6 +1,12 @@
 {
   "name": "fz-browse",
   "version": "0.0.0",
+  "files": [
+    "cli.mjs",
+    "server.mjs",
+    "dist",
+    "public"
+  ],
   "scripts": {
     "dev": "node server.mjs",
     "build": "npm run build:client && npm run build:server",
