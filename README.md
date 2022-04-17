@@ -101,9 +101,9 @@ It will be converted to following structure on view.
 <p>content C</p>
 ```
 
-## Architure
+## Architecture
 
-![architure.png](./docs/architure.png)
+![architecture.](./docs/architecture.png)
 
 ## Recipes
 
