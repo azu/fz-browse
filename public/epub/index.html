@@ -61,7 +61,8 @@
         })
         let currentItemIndex = 0;
         // first item
-        rendition.display(items[currentItemIndex].cfi);
+        const firstItem = items[currentItemIndex];
+        firstItem && rendition.display(firstItem.cfi);
         const searchNextButton = document.querySelector("#search-next");
         const searchPrevButton = document.querySelector("#search-prev");
         searchNextButton.addEventListener("click", () => {

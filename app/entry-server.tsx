@@ -5,8 +5,8 @@ import { App } from './App'
 const initialData = {
     initialQuery: "",
     cwd: "",
-    csrfToken: ""
-
+    csrfToken: "",
+    displayItemLimit: 200
 }
 
 export function render(url: string) {

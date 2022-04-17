@@ -1,12 +1,14 @@
-import { ChangeEventHandler, FC, useEffect, useMemo, useState, useTransition, VFC } from "react";
+import { ChangeEventHandler, FC, useEffect, useMemo, useRef, useState, useTransition, VFC } from "react";
 import { ParsedTSVLine, parseTSVLine } from "./lib/tsv-parse";
 
 import Highlighter from "react-highlight-words";
 import { Link, useSearchParams } from "react-router-dom";
-import { Route, Routes } from "react-router";
+import { Route, Routes, useNavigationType } from "react-router";
 import { PdfPreview } from "./preview/PdfPreview";
 import { EpubPreview } from "./preview/EpubPreview";
 import { DefaultPreview } from "./preview/DefaultPreview";
+import { useSessionStorage } from "./hooks/useSessionStorage";
+import { Action } from "history";
 
 const useCustomSearchParams = () => {
     const [search, setSearch] = useSearchParams();
@@ -28,10 +30,22 @@ export const Main: VFC<AppProps> = (props) => {
         return input.split(/[\^\[\]().+*$]/);
     }, [input]);
     const [isPending, startTransition] = useTransition();
-    const [tsvList, setTsvList] = useState<ParsedTSVLine[]>([])
+    const [tsvList, setTsvList] = useSessionStorage<ParsedTSVLine[]>("fz-browser-session-results", [])
+    const initialUpdate = useRef<boolean>(true);
+    const navigationType = useNavigationType()
     useEffect(() => {
-        setTsvList([])
-    }, [input])
+        // for preserve scroll
+        if (initialUpdate.current && navigationType === "POP") {
+            return;
+        }
+        setTsvList([]);
+    }, [input, navigationType])
+    useEffect(() => {
+        initialUpdate.current = false;
+        return () => {
+            initialUpdate.current = true;
+        }
+    }, []);
     const onInputChange: ChangeEventHandler<HTMLInputElement> = (event) => {
         const nextQuery = event.target.value;
         setInput(nextQuery);
@@ -42,6 +56,10 @@ export const Main: VFC<AppProps> = (props) => {
     }
     // stream
     useEffect(() => {
+        // for preserve scroll
+        if (initialUpdate.current && navigationType === Action.Pop) {
+            return
+        }
         const controller = new AbortController()
         const signal = controller.signal
         let textBuffer = '';
@@ -100,7 +118,7 @@ export const Main: VFC<AppProps> = (props) => {
             })
             controller.abort();
         }
-    }, [input])
+    }, [input, navigationType])
     return (
         <div style={{
             maxWidth: "1024px",
@@ -194,4 +212,14 @@ export const App: FC<AppProps> = (props) => {
         <Route index element={<Main {...props}/>}/>
         <Route path={"/preview"} element={<Preview {...props}/>}/>
     </Routes>
+}
+// preserve scroll
+if (typeof window !== "undefined" && 'scrollRestoration' in window.history) {
+    window.history.scrollRestoration = 'manual'
+    window.addEventListener('beforeunload', () => {
+        window.history.scrollRestoration = 'auto'
+    })
+    window.addEventListener('load', () => {
+        window.history.scrollRestoration = 'manual'
+    })
 }
