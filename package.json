@@ -7,7 +7,7 @@
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build --outDir dist/client",
     "build:server": "vite build --ssr app/entry-server.tsx --outDir dist/server",
-    "generate": "vite build --outDir dist/static && npm run build:server && node prerender.mjs",
+    "generate": "vite build --outDir dist/static && npm run build:server",
     "serve": "cross-env NODE_ENV=production node server.mjs",
     "debug": "node --inspect-brk server",
     "type-check": "tsc --noEmit",

@@ -7,20 +7,6 @@ import { Route, Routes } from "react-router";
 import { PdfPreview } from "./preview/PdfPreview";
 import { EpubPreview } from "./preview/EpubPreview";
 import { DefaultPreview } from "./preview/DefaultPreview";
-// Auto generates routes from files under ./pages
-// https://vitejs.dev/guide/features.html#glob-import
-// @ts-ignore
-const pages = import.meta.globEager('./pages/*.tsx')
-
-const routes = Object.keys(pages).map((path) => {
-    const name = path.match(/\.\/pages\/(.*)\.tsx$/)?.[1] ?? "<t>"
-    return {
-        name,
-        path: name === 'Home' ? '/' : `/${name.toLowerCase()}`,
-        component: pages[path].default
-    }
-})
-
 const useCustomSearchParams = () => {
     const [search, setSearch] = useSearchParams();
     const searchAsObject = useMemo(() => Object.fromEntries(
