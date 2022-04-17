@@ -152,7 +152,7 @@ end | [.data.path.text, .data.lines.text] | @tsv'
 fz-browse --run $'rg --ignore-case {input} --json | jq \'if .type == "begin" or .type == "match" then . else empty end | [.data.path.text, .data.lines.text] | @tsv\' -r' --preview "rg --context 5 {input} {target}" --open --browser "google chrome"
 ```
 
-### Search Images by Date
+### Search Images by Exif data
 
 Search Images using exiftool.
 
